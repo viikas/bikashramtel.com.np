@@ -9,7 +9,7 @@ export default function App() {
       <Navbar />
       <main>
         <Hero />
-        <Services />
+        {/* <Services /> */}
       </main>
       <Footer />
     </>
