@@ -1,1 +1,5 @@
 index copy.html
+node_modules/
+dist/
+.DS_Store
+*.local
