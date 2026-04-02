@@ -1,180 +1,158 @@
 import { useEffect, useRef } from 'react'
 
 /*
- * ALGORITHMIC PHILOSOPHY — "Digital Terrains"
+ * "Digital Terrains" — lightweight vanilla Canvas replacement for p5.js.
  *
- * Nepal's ridgelines translated into computational topography. Layered Perlin
- * noise builds invisible elevation fields; contour-line marching traces the
- * iso-curves where height meets threshold. Each contour band glows at a
- * different temperature — amber at altitude, teal in the valleys — as though
- * the land breathes warmth from its peaks downward.
+ * Perlin-inspired noise field with contour iso-lines and ambient particles.
+ * Amber at altitude, teal in the valleys.
  *
- * The algorithm never repeats: a seeded noise field drifts slowly on the Z
- * axis, making every moment a unique cross-section through infinite terrain.
- * Particle scouts float along the steepest-ascent vectors, leaving faint
- * phosphor trails that map the invisible wind.
+ * ~80 lines vs 1MB p5.js dependency.
  */
 
-const SEED   = 42
-const COLS   = 80
-const ROWS   = 50
-const SPEED  = 0.0004
-const PARTICLES = 120
+// Simple 2D noise (permutation-based, good enough for visual effect)
+const PERM = new Uint8Array(512)
+;(() => {
+  const p = new Uint8Array(256)
+  for (let i = 0; i < 256; i++) p[i] = i
+  for (let i = 255; i > 0; i--) {
+    const j = (i * 16807 + 37) % (i + 1) // seeded shuffle
+    ;[p[i], p[j]] = [p[j], p[i]]
+  }
+  for (let i = 0; i < 512; i++) PERM[i] = p[i & 255]
+})()
+
+function fade(t) { return t * t * t * (t * (t * 6 - 15) + 10) }
+function lerp(a, b, t) { return a + t * (b - a) }
+function grad(hash, x, y) {
+  const h = hash & 3
+  return (h < 2 ? (h === 0 ? x : -x) : 0) + (h < 2 ? 0 : h === 2 ? y : -y)
+}
+
+function noise2d(x, y) {
+  const xi = Math.floor(x) & 255, yi = Math.floor(y) & 255
+  const xf = x - Math.floor(x), yf = y - Math.floor(y)
+  const u = fade(xf), v = fade(yf)
+  const aa = PERM[PERM[xi] + yi], ab = PERM[PERM[xi] + yi + 1]
+  const ba = PERM[PERM[xi + 1] + yi], bb = PERM[PERM[xi + 1] + yi + 1]
+  return lerp(
+    lerp(grad(aa, xf, yf), grad(ba, xf - 1, yf), u),
+    lerp(grad(ab, xf, yf - 1), grad(bb, xf - 1, yf - 1), u),
+    v,
+  ) * 0.5 + 0.5 // normalize to 0–1
+}
+
+const COLS = 80, ROWS = 50, SPEED = 0.0004, NUM_PARTICLES = 120
+
+const palette = {
+  bg: [9, 8, 8],
+  high: [232, 160, 77],  // amber
+  low:  [77, 232, 196],  // teal
+}
 
 export default function ArtCanvas({ style }) {
-  const containerRef = useRef(null)
-  const sketchRef    = useRef(null)
+  const canvasRef = useRef(null)
+  const rafRef = useRef(null)
 
   useEffect(() => {
-    let p5Instance = null
+    const canvas = canvasRef.current
+    if (!canvas) return
+    const ctx = canvas.getContext('2d')
 
-    const initP5 = async () => {
-      const P5 = (await import('p5')).default
+    const resize = () => {
+      canvas.width = canvas.parentElement.offsetWidth
+      canvas.height = canvas.parentElement.offsetHeight
+    }
+    resize()
+    window.addEventListener('resize', resize)
 
-      const sketch = (p) => {
-        let t = 0
-        let particles = []
+    // Particles
+    const particles = Array.from({ length: NUM_PARTICLES }, () => ({
+      x: Math.random() * canvas.width,
+      y: Math.random() * canvas.height,
+      vx: 0, vy: 0,
+      life: 80 + Math.random() * 120,
+      maxLife: 0,
+      speed: 0.4 + Math.random() * 0.8,
+    }))
+    particles.forEach((p) => (p.maxLife = p.life))
 
-        const palette = {
-          bg:     [9,  8,  8],
-          c1:     [232, 160, 77,  55],  // amber — high elevation
-          c2:     [77,  232, 196, 38],  // teal  — low elevation
-          trail:  [232, 160, 77,  14],
-        }
-
-        class Particle {
-          constructor() { this.reset() }
-
-          reset() {
-            this.x  = p.random(p.width)
-            this.y  = p.random(p.height)
-            this.vx = 0
-            this.vy = 0
-            this.life   = p.random(80, 200)
-            this.maxLife = this.life
-            this.speed  = p.random(0.4, 1.2)
-          }
-
-          update() {
-            const nx = this.x / p.width  * 3
-            const ny = this.y / p.height * 3
-            const angle = p.noise(nx, ny, t * 3) * p.TWO_PI * 2
-            const mag   = this.speed
-
-            this.vx = this.vx * 0.85 + Math.cos(angle) * mag * 0.15
-            this.vy = this.vy * 0.85 + Math.sin(angle) * mag * 0.15
-
-            this.x += this.vx
-            this.y += this.vy
-            this.life--
-
-            if (
-              this.life <= 0 ||
-              this.x < 0 || this.x > p.width ||
-              this.y < 0 || this.y > p.height
-            ) {
-              this.reset()
-            }
-          }
-
-          draw() {
-            const alpha = (this.life / this.maxLife) * palette.trail[3]
-            p.stroke(palette.trail[0], palette.trail[1], palette.trail[2], alpha)
-            p.strokeWeight(1)
-            p.point(this.x, this.y)
-          }
-        }
-
-        p.setup = () => {
-          const canvas = p.createCanvas(
-            containerRef.current.offsetWidth,
-            containerRef.current.offsetHeight,
-          )
-          canvas.parent(containerRef.current)
-          canvas.style('position', 'absolute')
-          canvas.style('top', '0')
-          canvas.style('left', '0')
-          p.noiseDetail(4, 0.5)
-          p.noiseSeed(SEED)
-          p.randomSeed(SEED)
-          p.frameRate(24)
-          p.colorMode(p.RGB, 255)
-
-          for (let i = 0; i < PARTICLES; i++) {
-            particles.push(new Particle())
-          }
-        }
-
-        p.draw = () => {
-          // Soft fade — not full clear — for trail effect
-          p.noStroke()
-          p.fill(palette.bg[0], palette.bg[1], palette.bg[2], 18)
-          p.rect(0, 0, p.width, p.height)
-
-          const cw = p.width  / COLS
-          const ch = p.height / ROWS
-
-          // Draw contour iso-lines
-          for (let y = 0; y < ROWS; y++) {
-            for (let x = 0; x < COLS; x++) {
-              const nx = x / COLS * 2.5
-              const ny = y / ROWS * 2.5
-              const n  = p.noise(nx, ny, t)
-
-              // Select iso-threshold bands
-              const bands = [0.35, 0.42, 0.50, 0.57, 0.65, 0.72]
-              for (let b = 0; b < bands.length; b++) {
-                const thresh = bands[b]
-                if (Math.abs(n - thresh) < 0.018) {
-                  const highFrac = b / (bands.length - 1)
-                  const r = p.lerp(palette.c2[0], palette.c1[0], highFrac)
-                  const g = p.lerp(palette.c2[1], palette.c1[1], highFrac)
-                  const bl= p.lerp(palette.c2[2], palette.c1[2], highFrac)
-                  const a = p.lerp(palette.c2[3], palette.c1[3], highFrac)
-                  p.stroke(r, g, bl, a)
-                  p.strokeWeight(0.8)
-                  p.point(x * cw + cw * 0.5, y * ch + ch * 0.5)
-                }
-              }
-            }
-          }
-
-          // Update & draw particles
-          for (const part of particles) {
-            part.update()
-            part.draw()
-          }
-
-          t += SPEED
-        }
-
-        p.windowResized = () => {
-          if (containerRef.current) {
-            p.resizeCanvas(
-              containerRef.current.offsetWidth,
-              containerRef.current.offsetHeight,
-            )
-          }
-        }
-      }
-
-      p5Instance = new P5(sketch)
-      sketchRef.current = p5Instance
+    function resetParticle(p) {
+      p.x = Math.random() * canvas.width
+      p.y = Math.random() * canvas.height
+      p.vx = 0; p.vy = 0
+      p.life = 80 + Math.random() * 120
+      p.maxLife = p.life
+      p.speed = 0.4 + Math.random() * 0.8
     }
 
-    initP5()
+    let t = 0
+
+    function draw() {
+      // Soft fade
+      ctx.fillStyle = `rgba(${palette.bg[0]},${palette.bg[1]},${palette.bg[2]},0.07)`
+      ctx.fillRect(0, 0, canvas.width, canvas.height)
+
+      const cw = canvas.width / COLS
+      const ch = canvas.height / ROWS
+      const bands = [0.35, 0.42, 0.50, 0.57, 0.65, 0.72]
+
+      // Draw contour iso-lines
+      for (let y = 0; y < ROWS; y++) {
+        for (let x = 0; x < COLS; x++) {
+          const nx = x / COLS * 2.5
+          const ny = y / ROWS * 2.5
+          const n = noise2d(nx + t * 0.3, ny + t * 0.3)
+
+          for (let b = 0; b < bands.length; b++) {
+            if (Math.abs(n - bands[b]) < 0.018) {
+              const frac = b / (bands.length - 1)
+              const r = lerp(palette.low[0], palette.high[0], frac)
+              const g = lerp(palette.low[1], palette.high[1], frac)
+              const bl = lerp(palette.low[2], palette.high[2], frac)
+              const a = lerp(0.15, 0.22, frac)
+              ctx.fillStyle = `rgba(${r|0},${g|0},${bl|0},${a})`
+              ctx.fillRect(x * cw + cw * 0.5, y * ch + ch * 0.5, 1.2, 1.2)
+            }
+          }
+        }
+      }
+
+      // Particles
+      for (const p of particles) {
+        const nx = p.x / canvas.width * 3
+        const ny = p.y / canvas.height * 3
+        const angle = noise2d(nx, ny + t * 2) * Math.PI * 4
+        const mag = p.speed
+
+        p.vx = p.vx * 0.85 + Math.cos(angle) * mag * 0.15
+        p.vy = p.vy * 0.85 + Math.sin(angle) * mag * 0.15
+        p.x += p.vx
+        p.y += p.vy
+        p.life--
+
+        if (p.life <= 0 || p.x < 0 || p.x > canvas.width || p.y < 0 || p.y > canvas.height) {
+          resetParticle(p)
+        }
+
+        const alpha = (p.life / p.maxLife) * 0.055
+        ctx.fillStyle = `rgba(${palette.high[0]},${palette.high[1]},${palette.high[2]},${alpha})`
+        ctx.fillRect(p.x, p.y, 1, 1)
+      }
+
+      t += SPEED
+      rafRef.current = requestAnimationFrame(draw)
+    }
+
+    rafRef.current = requestAnimationFrame(draw)
 
     return () => {
-      if (sketchRef.current) {
-        sketchRef.current.remove()
-        sketchRef.current = null
-      }
+      cancelAnimationFrame(rafRef.current)
+      window.removeEventListener('resize', resize)
     }
   }, [])
 
   return (
     <div
-      ref={containerRef}
       style={{
         position: 'absolute',
         inset: 0,
@@ -184,6 +162,11 @@ export default function ArtCanvas({ style }) {
         pointerEvents: 'none',
         ...style,
       }}
-    />
+    >
+      <canvas
+        ref={canvasRef}
+        style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}
+      />
+    </div>
   )
 }

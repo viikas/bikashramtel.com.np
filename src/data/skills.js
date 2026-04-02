@@ -1,0 +1,91 @@
+export const skills = {
+  tagline: 'Oh right — I also write code for a living.',
+  currentWork: {
+    company: 'PortPro',
+    role: 'Software Engineer',
+    description: 'Building the #1 drayage TMS platform — AI-powered dispatch, automated invoicing, and real-time container tracking for 550+ trucking companies.',
+    url: 'https://portpro.io',
+    logo: '/images/portpro-logo.jpeg',
+  },
+  categories: [
+    {
+      title: 'Languages',
+      icon: '⌨️',
+      items: [
+        { name: 'JavaScript', level: 95 },
+        { name: 'TypeScript', level: 85 },
+        { name: 'Python', level: 80 },
+        { name: 'SQL', level: 75 },
+        { name: 'HTML / CSS', level: 90 },
+        { name: 'PHP', level: 75 },
+        { name: 'Bash', level: 70 },
+      ],
+    },
+    {
+      title: 'Frontend',
+      icon: '🖥️',
+      items: [
+        { name: 'React', level: 92 },
+        { name: 'Next.js', level: 85 },
+        { name: 'Tailwind CSS', level: 88 },
+        { name: 'Framer Motion', level: 80 },
+        { name: 'Vue.js', level: 65 },
+        { name: 'Three.js / WebGL', level: 60 },
+      ],
+    },
+    {
+      title: 'Backend & Infra',
+      icon: '⚙️',
+      items: [
+        { name: 'Node.js', level: 90 },
+        { name: 'Express / Fastify', level: 88 },
+        { name: 'PostgreSQL', level: 80 },
+        { name: 'MongoDB', level: 78 },
+        { name: 'Docker', level: 75 },
+        { name: 'AWS / Cloud', level: 70 },
+      ],
+    },
+    {
+      title: 'AI & ML',
+      icon: '🧠',
+      items: [
+        { name: 'LLM Integration', level: 85 },
+        { name: 'Prompt Engineering', level: 90 },
+        { name: 'LangChain / RAG', level: 78 },
+        { name: 'OpenAI / Claude API', level: 85 },
+        { name: 'Vector Databases', level: 72 },
+        { name: 'Fine-tuning', level: 65 },
+      ],
+    },
+    {
+      title: 'Tools & Workflow',
+      icon: '🔧',
+      items: [
+        { name: 'Git / GitHub', level: 92 },
+        { name: 'Linux / CLI', level: 85 },
+        { name: 'CI/CD Pipelines', level: 78 },
+        { name: 'Figma', level: 65 },
+        { name: 'Vite / Webpack', level: 80 },
+        { name: 'VS Code', level: 95 },
+      ],
+    },
+    {
+      title: 'Emerging',
+      icon: '🚀',
+      items: [
+        { name: 'AI Agents', level: 75 },
+        { name: 'MCP / Tool Use', level: 70 },
+        { name: 'Edge Computing', level: 60 },
+        { name: 'WebAssembly', level: 55 },
+        { name: 'Rust', level: 40 },
+        { name: 'Web3 Basics', level: 45 },
+      ],
+    },
+  ],
+  stats: {
+    yearsExp: '12+',
+    techStack: '30+',
+    projects: '20+',
+    motto: 'Ship fast, break things, learn faster',
+  },
+}

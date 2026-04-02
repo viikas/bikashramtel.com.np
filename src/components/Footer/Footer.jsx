@@ -38,8 +38,7 @@ export default function Footer() {
             Bikash <span className={styles.logoAccent}>Ramtel</span>
           </span>
           <p className={styles.tagline}>
-            Passionate developer building digital experiences that matter.
-            Always open to new challenges and collaborations.
+            Gamer. Otaku. Tinkerer. Painter. Also writes code for a living.
           </p>
           <div className={styles.social}>
             {socialLinks.map((s) => (
@@ -70,10 +69,16 @@ export default function Footer() {
           animate={inView ? 'visible' : 'hidden'}
           variants={colVariants}
         >
-          <h4 className={styles.colTitle}>Navigation</h4>
+          <h4 className={styles.colTitle}>Explore</h4>
           {[
-            { label: 'Home',     href: '#home' },
-            { label: 'Services', href: '#services' },
+            { label: 'Home',   href: '#home' },
+            { label: 'Gaming', href: '#gaming' },
+            { label: 'DIY',    href: '#diy' },
+            { label: 'Anime',  href: '#anime' },
+            { label: 'Movies', href: '#movies' },
+            { label: 'About',  href: '#about' },
+            { label: 'Art',    href: '#art' },
+            { label: 'Skills', href: '#skills' },
           ].map((link) => (
             <button
               key={link.href}
@@ -115,11 +120,11 @@ export default function Footer() {
         animate={inView ? { opacity: 1 } : { opacity: 0 }}
         transition={{ delay: 0.4, duration: 0.6 }}
       >
-        <p className={styles.copy}>© 2026 Bikash Ramtel. All rights reserved.</p>
+        <p className={styles.copy}>&copy; 2026 Bikash Ramtel. All rights reserved.</p>
         <p className={styles.credit}>
-          Designed & built with ♥ by{' '}
+          Built with love & late nights by{' '}
           <a href="https://bikashramtel.com.np" target="_blank" rel="noreferrer">
-            Bikash Ramtel
+            Bikash
           </a>
         </p>
       </motion.div>

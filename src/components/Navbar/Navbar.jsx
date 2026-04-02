@@ -2,9 +2,24 @@ import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import styles from './Navbar.module.css'
 
-const navLinks = [
-  { label: 'Home',     href: '#home' },
-  { label: 'Services', href: '#services' },
+/* Desktop shows a curated set; mobile shows everything */
+const desktopLinks = [
+  { label: 'Gaming', href: '#gaming' },
+  { label: 'Watchlist', href: '#anime' },
+  { label: 'DIY',    href: '#diy' },
+  { label: 'About',  href: '#about' },
+  { label: 'Skills', href: '#skills' },
+]
+
+const allLinks = [
+  { label: 'Home',   href: '#home' },
+  { label: 'Gaming', href: '#gaming' },
+  { label: 'DIY',    href: '#diy' },
+  { label: 'Watchlist', href: '#anime' },
+  { label: 'Movies', href: '#movies' },
+  { label: 'About',  href: '#about' },
+  { label: 'Art',    href: '#art' },
+  { label: 'Skills', href: '#skills' },
 ]
 
 export default function Navbar() {
@@ -42,7 +57,7 @@ export default function Navbar() {
 
         {/* Desktop links */}
         <div className={styles.links}>
-          {navLinks.map((link) => (
+          {desktopLinks.map((link) => (
             <button
               key={link.href}
               className={styles.link}
@@ -51,14 +66,6 @@ export default function Navbar() {
               {link.label}
             </button>
           ))}
-          <motion.button
-            className={styles.cta}
-            onClick={() => handleLink('#contact')}
-            whileHover={{ scale: 1.04 }}
-            whileTap={{ scale: 0.97 }}
-          >
-            Let's Talk
-          </motion.button>
         </div>
 
         {/* Hamburger */}
@@ -73,7 +80,7 @@ export default function Navbar() {
         </button>
       </motion.nav>
 
-      {/* Mobile overlay */}
+      {/* Mobile overlay — shows all links */}
       <AnimatePresence>
         {menuOpen && (
           <motion.div
@@ -83,28 +90,18 @@ export default function Navbar() {
             exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
           >
-            {navLinks.map((link, i) => (
+            {allLinks.map((link, i) => (
               <motion.button
                 key={link.href}
                 className={styles.mobileLink}
                 onClick={() => handleLink(link.href)}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.07 + 0.1, ease: [0.16, 1, 0.3, 1] }}
+                transition={{ delay: i * 0.05 + 0.1, ease: [0.16, 1, 0.3, 1] }}
               >
                 {link.label}
               </motion.button>
             ))}
-            <motion.button
-              className={styles.mobileLink}
-              onClick={() => handleLink('#contact')}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: navLinks.length * 0.07 + 0.1, ease: [0.16, 1, 0.3, 1] }}
-              style={{ color: 'var(--amber)' }}
-            >
-              Let's Talk
-            </motion.button>
           </motion.div>
         )}
       </AnimatePresence>

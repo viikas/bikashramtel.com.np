@@ -1,162 +1,146 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import ArtCanvas from './ArtCanvas'
 import styles from './Hero.module.css'
-import { slides } from '../../data/slides'
 
-const INTERVAL = 5800
+const identities = [
+  { text: 'Gamer',     color: 'var(--amber)' },
+  { text: 'Otaku',     color: 'var(--teal)' },
+  { text: 'Tinkerer',  color: 'var(--ember)' },
+  { text: 'Cinephile', color: 'var(--amber)' },
+  { text: 'Painter',   color: 'var(--teal)' },
+  { text: 'Developer', color: 'var(--ember)' },
+]
 
-/* Framer Motion variants */
-const contentVariants = {
-  enter: { opacity: 0, y: 28 },
-  center: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.65, ease: [0.16, 1, 0.3, 1] },
-  },
-  exit: {
-    opacity: 0,
-    y: -18,
-    transition: { duration: 0.35, ease: [0.55, 0, 1, 0.45] },
-  },
-}
-
-const tagVariants = {
-  enter:  { opacity: 0, x: -12 },
-  center: { opacity: 1, x: 0, transition: { duration: 0.5, delay: 0.05, ease: [0.16, 1, 0.3, 1] } },
-  exit:   { opacity: 0, x: 12,  transition: { duration: 0.25 } },
-}
-
-const imageVariants = {
-  enter:  { opacity: 0, scale: 1.06 },
-  center: { opacity: 1, scale: 1,    transition: { duration: 1.1, ease: [0.16, 1, 0.3, 1] } },
-  exit:   { opacity: 0, scale: 0.98, transition: { duration: 0.55 } },
-}
+const CYCLE_INTERVAL = 2200
 
 export default function Hero() {
-  const [current, setCurrent] = useState(0)
-  const [direction, setDirection] = useState(1)
-  const timerRef = useRef(null)
-
-  const goTo = (idx) => {
-    setDirection(idx > current ? 1 : -1)
-    setCurrent(idx)
-    resetTimer()
-  }
-
-  const resetTimer = () => {
-    clearInterval(timerRef.current)
-    timerRef.current = setInterval(() => {
-      setCurrent((c) => (c + 1) % slides.length)
-      setDirection(1)
-    }, INTERVAL)
-  }
+  const [index, setIndex] = useState(0)
 
   useEffect(() => {
-    resetTimer()
-    return () => clearInterval(timerRef.current)
+    const timer = setInterval(
+      () => setIndex((i) => (i + 1) % identities.length),
+      CYCLE_INTERVAL,
+    )
+    return () => clearInterval(timer)
   }, [])
 
-  const slide = slides[current]
+  const identity = identities[index]
 
   return (
     <section className={styles.hero} id="home">
-      {/* Background image with AnimatePresence */}
-      <AnimatePresence mode="sync">
-        <motion.div
-          key={`bg-${current}`}
-          className={styles.slideBg}
-          variants={imageVariants}
-          initial="enter"
-          animate="center"
-          exit="exit"
-        >
-          <img src={slide.image} alt={slide.tag} loading="eager" />
-        </motion.div>
-      </AnimatePresence>
+      {/* Gradient backdrop */}
+      <div className={styles.backdrop} />
 
-      {/* Dark overlay */}
-      <div className={styles.overlay} />
+      {/* Scanline overlay */}
+      <div className={styles.scanlines} />
 
       {/* p5.js algorithmic art */}
-      <ArtCanvas style={{ zIndex: 3 }} />
+      <ArtCanvas style={{ zIndex: 2 }} />
 
-      {/* Slide content */}
+      {/* Grid pattern */}
+      <div className={styles.grid} />
+
+      {/* Content */}
       <div className={styles.content}>
-        <AnimatePresence mode="wait">
-          <motion.div key={`tag-${current}`} variants={tagVariants} initial="enter" animate="center" exit="exit">
-            <div className={styles.tag}>
-              <span className={styles.tagDot} />
-              {slide.tag}
+        {/* Status indicator */}
+        <motion.div
+          className={styles.status}
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 0.3, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+        >
+          <span className={styles.statusDot} />
+          <span className={styles.statusText}>ONLINE</span>
+        </motion.div>
+
+        {/* Main heading */}
+        <motion.div
+          className={styles.heading}
+          initial={{ opacity: 0, y: 40 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1, duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+        >
+          <h1 className={styles.name}>Bikash Ramtel</h1>
+
+          <div className={styles.identityRow}>
+            <span className={styles.iAm}>I am a </span>
+            <div className={styles.identitySlot}>
+              <AnimatePresence mode="wait">
+                <motion.span
+                  key={identity.text}
+                  className={styles.identity}
+                  style={{ color: identity.color }}
+                  initial={{ y: 30, opacity: 0, filter: 'blur(8px)' }}
+                  animate={{ y: 0, opacity: 1, filter: 'blur(0px)' }}
+                  exit={{ y: -30, opacity: 0, filter: 'blur(8px)' }}
+                  transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+                >
+                  {identity.text}
+                </motion.span>
+              </AnimatePresence>
             </div>
-          </motion.div>
-        </AnimatePresence>
+          </div>
+        </motion.div>
 
-        <AnimatePresence mode="wait">
-          <motion.h1
-            key={`title-${current}`}
-            className={styles.title}
-            variants={contentVariants}
-            initial="enter"
-            animate="center"
-            exit="exit"
-            dangerouslySetInnerHTML={{
-              __html: slide.title.replace(
-                /<span class="titleAccent">/g,
-                `<span style="color:var(--amber);font-style:italic;">`
-              ),
-            }}
+        {/* Subtitle */}
+        <motion.p
+          className={styles.subtitle}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.5, duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+        >
+          Building things IRL & in code from Kathmandu, Nepal.
+          <br />
+          Soulslike enthusiast. One Piece faithful. Maker of random things.
+        </motion.p>
+
+        {/* Quick identity badges */}
+        <motion.div
+          className={styles.badges}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.7, duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+        >
+          {identities.map((id, i) => (
+            <motion.span
+              key={id.text}
+              className={`${styles.badge} ${i === index ? styles.badgeActive : ''}`}
+              style={i === index ? { borderColor: id.color, color: id.color } : {}}
+              whileHover={{ scale: 1.05, y: -2 }}
+              onClick={() => setIndex(i)}
+            >
+              {id.text}
+            </motion.span>
+          ))}
+        </motion.div>
+
+        {/* Scroll indicator */}
+        <motion.div
+          className={styles.scrollHint}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 1.2, duration: 0.8 }}
+        >
+          <motion.div
+            className={styles.scrollLine}
+            animate={{ scaleY: [0, 1, 0] }}
+            transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
           />
-        </AnimatePresence>
-
-        <AnimatePresence mode="wait">
-          <motion.p
-            key={`desc-${current}`}
-            className={styles.desc}
-            variants={contentVariants}
-            initial="enter"
-            animate="center"
-            exit="exit"
-            transition={{ delay: 0.08 }}
-          >
-            {slide.desc}
-          </motion.p>
-        </AnimatePresence>
-
+          <span className={styles.scrollLabel}>SCROLL</span>
+        </motion.div>
       </div>
 
-      {/* Dot navigation */}
-      <div className={styles.controls}>
-        {slides.map((_, i) => (
-          <motion.button
-            key={i}
-            className={`${styles.dot} ${i === current ? styles.dotActive : ''}`}
-            onClick={() => goTo(i)}
-            whileHover={{ opacity: 0.8 }}
-            aria-label={`Go to slide ${i + 1}`}
-          />
-        ))}
-      </div>
+      {/* Decorative corner elements */}
+      <div className={`${styles.corner} ${styles.cornerTL}`} />
+      <div className={`${styles.corner} ${styles.cornerBR}`} />
 
-      {/* Slide counter watermark */}
+      {/* Bottom progress accent */}
       <motion.div
-        className={styles.counter}
-        key={`counter-${current}`}
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-      >
-        {String(current + 1).padStart(2, '0')}
-      </motion.div>
-
-      {/* Progress bar */}
-      <motion.div
-        className={styles.progress}
-        key={`progress-${current}`}
+        className={styles.accentBar}
         initial={{ scaleX: 0 }}
         animate={{ scaleX: 1 }}
-        transition={{ duration: INTERVAL / 1000, ease: 'linear' }}
-        style={{ width: '100%' }}
+        transition={{ delay: 0.2, duration: 1.5, ease: [0.16, 1, 0.3, 1] }}
       />
     </section>
   )

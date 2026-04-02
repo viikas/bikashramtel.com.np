@@ -1,0 +1,39 @@
+.fallback {
+  padding: 60px 6%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  text-align: center;
+}
+
+.icon {
+  font-size: 1.5rem;
+  opacity: 0.6;
+}
+
+.text {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: var(--muted);
+  letter-spacing: 0.04em;
+}
+
+.retry {
+  padding: 8px 20px;
+  border: 1px solid var(--muted2);
+  border-radius: 2px;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.retry:hover {
+  border-color: var(--amber);
+  color: var(--amber);
+}
