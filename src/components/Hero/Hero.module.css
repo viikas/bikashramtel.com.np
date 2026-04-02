@@ -133,13 +133,17 @@
 }
 
 /* Subtitle */
+.subtitleWrap {
+  min-height: 60px;
+  margin-bottom: 32px;
+}
+
 .subtitle {
   font-family: var(--font-body);
   font-size: clamp(0.9rem, 1.4vw, 1.05rem);
   line-height: 1.8;
   color: var(--muted);
   max-width: 520px;
-  margin-bottom: 32px;
 }
 
 /* Identity badges */

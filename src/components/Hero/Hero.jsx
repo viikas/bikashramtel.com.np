@@ -4,15 +4,15 @@ import ArtCanvas from './ArtCanvas'
 import styles from './Hero.module.css'
 
 const identities = [
-  { text: 'Gamer',     color: 'var(--amber)' },
-  { text: 'Otaku',     color: 'var(--teal)' },
-  { text: 'Tinkerer',  color: 'var(--ember)' },
-  { text: 'Cinephile', color: 'var(--amber)' },
-  { text: 'Painter',   color: 'var(--teal)' },
-  { text: 'Developer', color: 'var(--ember)' },
+  { text: 'Gamer',     color: 'var(--amber)', desc: "Games are more than entertainment — they're art, story, and adventure. Whether I'm surviving the open plains of Red Dead Redemption 2, building empires in Minecraft, or dropping into a PUBG battleground, every session is a story worth telling." },
+  { text: 'Otaku',     color: 'var(--teal)',  desc: "Anime isn't just animation — it's philosophy, emotion, and breathtaking storytelling. Currently sailing the seas with One Piece and diving deep into the lore of the Fate series. Manga, light novels, and late-night episode marathons are a core part of who I am." },
+  { text: 'Tinkerer',  color: 'var(--ember)', desc: "Circuits, soldering irons, and sheer curiosity — that's my workshop. I love hacking together electronic gadgets, building drones from scratch, and experimenting with robotics. Right now I'm crafting a bamboo bow and arrow entirely by hand." },
+  { text: 'Cinephile', color: 'var(--amber)', desc: "A devoted fan of sci-fi, thrillers, and gripping dramas that make you think long after the credits roll. Recently captivated by A Knight of the Seven Kingdoms, Predator, and the mind-bending scope of 3 Body Problem." },
+  { text: 'Painter',   color: 'var(--teal)',  desc: "Putting color on canvas when the mood strikes. Semi-abstract vibes." },
+  { text: 'Developer', color: 'var(--ember)', desc: "I design and build resilient distributed systems with a passion for clean architecture. From crafting LLM-powered backends with Node.js to engineering real-time AI pipelines — I thrive where deep system design meets cutting-edge technology." },
 ]
 
-const CYCLE_INTERVAL = 2200
+const CYCLE_INTERVAL = 4200
 
 export default function Hero() {
   const [index, setIndex] = useState(0)
@@ -83,17 +83,21 @@ export default function Hero() {
           </div>
         </motion.div>
 
-        {/* Subtitle */}
-        <motion.p
-          className={styles.subtitle}
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5, duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
-        >
-          Building things IRL & in code from Kathmandu, Nepal.
-          <br />
-          Soulslike enthusiast. One Piece faithful. Maker of random things.
-        </motion.p>
+        {/* Subtitle — changes with identity */}
+        <div className={styles.subtitleWrap}>
+          <AnimatePresence mode="wait">
+            <motion.p
+              key={identity.text}
+              className={styles.subtitle}
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -12 }}
+              transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+            >
+              {identity.desc}
+            </motion.p>
+          </AnimatePresence>
+        </div>
 
         {/* Quick identity badges */}
         <motion.div
