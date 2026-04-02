@@ -105,6 +105,70 @@
   transform: translateX(4px);
 }
 
+/* Contact form */
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.input,
+.textarea {
+  width: 100%;
+  padding: 10px 12px;
+  background: var(--bg);
+  border: 1px solid var(--muted2);
+  border-radius: 2px;
+  font-family: var(--font-body);
+  font-size: 0.82rem;
+  color: var(--cream);
+  transition: border-color 0.25s ease;
+  outline: none;
+}
+
+.input::placeholder,
+.textarea::placeholder {
+  color: var(--muted);
+}
+
+.input:focus,
+.textarea:focus {
+  border-color: var(--amber);
+}
+
+.textarea {
+  resize: vertical;
+  min-height: 60px;
+}
+
+.formBtn {
+  align-self: flex-start;
+  padding: 9px 20px;
+  background: var(--amber);
+  border: 1px solid var(--amber);
+  border-radius: 2px;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--bg);
+  cursor: pointer;
+  transition: background 0.25s ease, color 0.25s ease, box-shadow 0.25s ease;
+}
+
+.formBtn:hover {
+  background: transparent;
+  color: var(--amber);
+  box-shadow: 0 0 20px rgba(232, 160, 77, 0.2);
+}
+
+.formBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 /* Bottom */
 .bottom {
   display: flex;

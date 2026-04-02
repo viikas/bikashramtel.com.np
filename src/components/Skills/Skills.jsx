@@ -12,11 +12,12 @@ const catVariants = {
   }),
 }
 
-const barVariants = {
-  hidden: { scaleX: 0 },
-  visible: (level) => ({
-    scaleX: level / 100,
-    transition: { duration: 0.8, ease: [0.16, 1, 0.3, 1] },
+const chipVariants = {
+  hidden: { opacity: 0, scale: 0.85 },
+  visible: (i) => ({
+    opacity: 1,
+    scale: 1,
+    transition: { delay: i * 0.03, duration: 0.3, ease: [0.16, 1, 0.3, 1] },
   }),
 }
 
@@ -105,19 +106,17 @@ export default function Skills() {
             className={styles.statsBar}
             initial={{ opacity: 0, y: 15 }}
             animate={inView ? { opacity: 1, y: 0 } : {}}
-            transition={{ delay: 0.2, duration: 0.5 }}
+            transition={{ delay: 0.25, duration: 0.5 }}
           >
-            {Object.entries(data.stats)
-              .filter(([key]) => key !== 'motto')
-              .map(([key, val]) => (
-                <div key={key} className={styles.stat}>
-                  <span className={styles.statValue}>{val}</span>
-                  <span className={styles.statLabel}>{key.replace(/([A-Z])/g, ' $1').trim()}</span>
-                </div>
-              ))}
+            {Object.entries(data.stats).map(([key, val]) => (
+              <div key={key} className={styles.stat}>
+                <span className={styles.statValue}>{val}</span>
+                <span className={styles.statLabel}>{key.replace(/([A-Z])/g, ' $1').trim()}</span>
+              </div>
+            ))}
           </motion.div>
 
-          {/* Skill categories grid */}
+          {/* Skill categories — chip layout */}
           <div className={styles.grid}>
             {data.categories.map((cat, ci) => (
               <motion.div
@@ -132,31 +131,19 @@ export default function Skills() {
                   <span className={styles.cardIcon}>{cat.icon}</span>
                   <h3 className={styles.cardTitle}>{cat.title}</h3>
                 </div>
-                <div className={styles.skillList}>
-                  {cat.items.map((skill) => (
-                    <div key={skill.name} className={styles.skillRow}>
-                      <div className={styles.skillInfo}>
-                        <span className={styles.skillName}>{skill.name}</span>
-                        <span className={styles.skillLevel}>{skill.level}%</span>
-                      </div>
-                      <div className={styles.barTrack}>
-                        <motion.div
-                          className={styles.barFill}
-                          custom={skill.level}
-                          initial="hidden"
-                          animate={inView ? 'visible' : 'hidden'}
-                          variants={barVariants}
-                          style={{
-                            background:
-                              skill.level >= 85
-                                ? 'linear-gradient(90deg, var(--amber), var(--ember))'
-                                : skill.level >= 70
-                                  ? 'linear-gradient(90deg, var(--teal), var(--amber))'
-                                  : 'linear-gradient(90deg, var(--muted), var(--teal))',
-                          }}
-                        />
-                      </div>
-                    </div>
+                <div className={styles.chips}>
+                  {cat.items.map((skill, si) => (
+                    <motion.span
+                      key={skill}
+                      className={styles.chip}
+                      data-tier={cat.title}
+                      custom={si}
+                      initial="hidden"
+                      animate={inView ? 'visible' : 'hidden'}
+                      variants={chipVariants}
+                    >
+                      {skill}
+                    </motion.span>
                   ))}
                 </div>
               </motion.div>

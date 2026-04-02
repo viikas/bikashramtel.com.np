@@ -5,20 +5,21 @@ import styles from './Navbar.module.css'
 /* Desktop shows a curated set; mobile shows everything */
 const desktopLinks = [
   { label: 'Gaming', href: '#gaming' },
-  { label: 'Watchlist', href: '#anime' },
   { label: 'DIY',    href: '#diy' },
+  { label: 'Anime',  href: '#anime' },
+  { label: 'Movies', href: '#movies' },
+  { label: 'Art',    href: '#art' },
   { label: 'About',  href: '#about' },
-  { label: 'Skills', href: '#skills' },
 ]
 
 const allLinks = [
   { label: 'Home',   href: '#home' },
   { label: 'Gaming', href: '#gaming' },
   { label: 'DIY',    href: '#diy' },
-  { label: 'Watchlist', href: '#anime' },
+  { label: 'Anime',  href: '#anime' },
   { label: 'Movies', href: '#movies' },
-  { label: 'About',  href: '#about' },
   { label: 'Art',    href: '#art' },
+  { label: 'About',  href: '#about' },
   { label: 'Skills', href: '#skills' },
 ]
 
@@ -42,6 +43,8 @@ export default function Navbar() {
     <>
       <motion.nav
         className={`${styles.nav} ${scrolled ? styles.navScrolled : ''}`}
+        role="navigation"
+        aria-label="Main navigation"
         initial={{ y: -80, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}

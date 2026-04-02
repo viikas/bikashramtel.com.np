@@ -13,6 +13,15 @@ const factVariants = {
   }),
 }
 
+const timelineVariants = {
+  hidden: { opacity: 0, x: -20 },
+  visible: (i) => ({
+    opacity: 1,
+    x: 0,
+    transition: { delay: i * 0.08, duration: 0.5, ease: [0.16, 1, 0.3, 1] },
+  }),
+}
+
 export default function About() {
   const [data, setData] = useState(null)
   const ref = useRef(null)
@@ -34,7 +43,7 @@ export default function About() {
               animate={inView ? { opacity: 1, x: 0 } : {}}
               transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
             >
-              <span className={styles.tagIcon}>💻</span> ABOUT
+              <span className={styles.tagIcon}>👋</span> ABOUT
             </motion.span>
             <motion.h2
               className={styles.title}
@@ -46,42 +55,66 @@ export default function About() {
             </motion.h2>
           </div>
 
-          <div className={styles.content}>
-            {/* Bio */}
-            <motion.div
-              className={styles.bio}
-              initial={{ opacity: 0, y: 20 }}
-              animate={inView ? { opacity: 1, y: 0 } : {}}
-              transition={{ delay: 0.15, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-            >
-              <p className={styles.tagline}>{data.tagline}</p>
-              <p className={styles.bioText}>{data.bio}</p>
-              <div className={styles.location}>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
-                  <circle cx="12" cy="10" r="3" />
-                </svg>
-                {data.location}
-              </div>
-            </motion.div>
-
-            {/* Quick facts grid */}
-            <div className={styles.factsGrid}>
-              {data.quickFacts.map((fact, i) => (
-                <motion.div
-                  key={fact.label}
-                  className={styles.factCard}
-                  custom={i}
-                  initial="hidden"
-                  animate={inView ? 'visible' : 'hidden'}
-                  variants={factVariants}
-                  whileHover={{ scale: 1.05, y: -4 }}
-                >
-                  <span className={styles.factValue}>{fact.value}</span>
-                  <span className={styles.factLabel}>{fact.label}</span>
-                </motion.div>
-              ))}
+          {/* Bio */}
+          <motion.div
+            className={styles.bio}
+            initial={{ opacity: 0, y: 20 }}
+            animate={inView ? { opacity: 1, y: 0 } : {}}
+            transition={{ delay: 0.15, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+          >
+            <p className={styles.tagline}>{data.tagline}</p>
+            <p className={styles.bioText}>{data.bio}</p>
+            <div className={styles.location}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+                <circle cx="12" cy="10" r="3" />
+              </svg>
+              {data.location}
             </div>
+          </motion.div>
+
+          {/* Journey timeline */}
+          {data.journey && (
+            <div className={styles.timeline}>
+              <h3 className={styles.timelineTitle}>The Journey</h3>
+              <div className={styles.timelineList}>
+                {data.journey.map((item, i) => (
+                  <motion.div
+                    key={item.year}
+                    className={styles.timelineItem}
+                    custom={i}
+                    initial="hidden"
+                    animate={inView ? 'visible' : 'hidden'}
+                    variants={timelineVariants}
+                  >
+                    <div className={styles.timelineDot} />
+                    <div className={styles.timelineContent}>
+                      <span className={styles.timelineYear}>{item.year}</span>
+                      <h4 className={styles.timelineItemTitle}>{item.title}</h4>
+                      <p className={styles.timelineDesc}>{item.desc}</p>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Quick facts grid */}
+          <div className={styles.factsGrid}>
+            {data.quickFacts.map((fact, i) => (
+              <motion.div
+                key={fact.label}
+                className={styles.factCard}
+                custom={i}
+                initial="hidden"
+                animate={inView ? 'visible' : 'hidden'}
+                variants={factVariants}
+                whileHover={{ scale: 1.05, y: -4 }}
+              >
+                <span className={styles.factValue}>{fact.value}</span>
+                <span className={styles.factLabel}>{fact.label}</span>
+              </motion.div>
+            ))}
           </div>
         </>
       )}

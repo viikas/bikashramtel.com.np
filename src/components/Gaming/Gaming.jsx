@@ -107,7 +107,6 @@ export default function Gaming() {
                         loading="lazy"
                       />
                     )}
-                    <span className={styles.cardRating}>{game.rating}</span>
                   </div>
                   <div className={styles.cardInfo}>
                     <h4 className={styles.cardTitle}>{game.title}</h4>

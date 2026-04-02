@@ -59,6 +59,7 @@ export const movies = {
       type: 'TV Series',
       genre: 'Sci-Fi / Comedy',
       year: 2013,
+
       rating: 9.5,
       gradient: 'linear-gradient(135deg, #1a0a0a, #0a0a0a)',
     },

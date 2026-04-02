@@ -95,7 +95,7 @@ export default function Anime() {
                   <div className={styles.cardBody}>
                     <h4 className={styles.cardTitle}>{item.title}</h4>
                     <div className={styles.cardMeta}>
-                      <span className={styles.cardEps}>{item.episodes} ep</span>
+                      <span className={styles.cardEps}>{item.episodes}{String(item.episodes).includes('ch') ? '' : ' ep'}</span>
                       <span className={styles.cardRating}>★ {item.rating}</span>
                     </div>
                     <div className={styles.cardStatus} data-status={item.status}>

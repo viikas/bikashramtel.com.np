@@ -15,7 +15,7 @@
 }
 
 .sectionHeader {
-  margin-bottom: 40px;
+  margin-bottom: 32px;
 }
 
 .tag {
@@ -43,16 +43,10 @@
   color: var(--cream);
 }
 
-.content {
-  display: grid;
-  grid-template-columns: 1.2fr 1fr;
-  gap: 60px;
-  align-items: start;
-}
-
 /* Bio */
 .bio {
-  position: relative;
+  margin-bottom: 40px;
+  max-width: 640px;
 }
 
 .tagline {
@@ -62,7 +56,7 @@
   font-style: italic;
   color: var(--amber);
   line-height: 1.5;
-  margin-bottom: 20px;
+  margin-bottom: 16px;
 }
 
 .bioText {
@@ -70,7 +64,7 @@
   font-size: 0.95rem;
   line-height: 1.85;
   color: var(--muted);
-  margin-bottom: 20px;
+  margin-bottom: 16px;
 }
 
 .location {
@@ -87,10 +81,90 @@
   color: var(--amber);
 }
 
+/* Journey timeline */
+.timeline {
+  margin-bottom: 40px;
+}
+
+.timelineTitle {
+  font-family: var(--font-display);
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--cream);
+  margin-bottom: 24px;
+}
+
+.timelineList {
+  position: relative;
+  padding-left: 28px;
+}
+
+.timelineList::before {
+  content: '';
+  position: absolute;
+  left: 5px;
+  top: 6px;
+  bottom: 6px;
+  width: 1px;
+  background: var(--muted2);
+}
+
+.timelineItem {
+  position: relative;
+  padding-bottom: 24px;
+}
+
+.timelineItem:last-child {
+  padding-bottom: 0;
+}
+
+.timelineDot {
+  position: absolute;
+  left: -28px;
+  top: 6px;
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  background: var(--card);
+  border: 2px solid var(--amber);
+}
+
+.timelineItem:last-child .timelineDot {
+  border-color: var(--teal);
+  box-shadow: 0 0 8px var(--teal);
+}
+
+.timelineContent {}
+
+.timelineYear {
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  color: var(--amber);
+  text-transform: uppercase;
+}
+
+.timelineItemTitle {
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--cream);
+  margin: 4px 0 6px;
+}
+
+.timelineDesc {
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  line-height: 1.65;
+  color: var(--muted);
+  max-width: 480px;
+}
+
 /* Facts grid */
 .factsGrid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
   gap: 12px;
 }
 
@@ -98,7 +172,7 @@
   display: flex;
   flex-direction: column;
   gap: 6px;
-  padding: 20px;
+  padding: 18px;
   background: var(--card);
   border: 1px solid var(--border);
   border-radius: 4px;
@@ -113,7 +187,7 @@
 
 .factValue {
   font-family: var(--font-display);
-  font-size: 1.8rem;
+  font-size: 1.6rem;
   font-weight: 900;
   color: var(--cream);
   letter-spacing: -1px;
@@ -121,18 +195,11 @@
 
 .factLabel {
   font-family: var(--font-mono);
-  font-size: 0.62rem;
+  font-size: 0.6rem;
   font-weight: 600;
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--muted);
-}
-
-@media (max-width: 900px) {
-  .content {
-    grid-template-columns: 1fr;
-    gap: 40px;
-  }
 }
 
 @media (max-width: 600px) {
@@ -146,6 +213,6 @@
   }
 
   .factValue {
-    font-size: 1.4rem;
+    font-size: 1.3rem;
   }
 }

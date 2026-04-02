@@ -13,8 +13,11 @@ import Footer         from './components/Footer/Footer'
 export default function App() {
   return (
     <>
+      <a href="#main" className="sr-only" style={{ position: 'absolute', top: 0, left: 0, zIndex: 9999, padding: '12px 24px', background: 'var(--amber)', color: 'var(--bg)', fontWeight: 700 }}>
+        Skip to content
+      </a>
       <Navbar />
-      <main>
+      <main id="main" role="main">
         <ErrorBoundary name="Hero"><Hero /></ErrorBoundary>
         <ErrorBoundary name="Gaming"><Gaming /></ErrorBoundary>
         <ErrorBoundary name="DIY"><DIY /></ErrorBoundary>
@@ -23,7 +26,6 @@ export default function App() {
         <ErrorBoundary name="Art"><Art /></ErrorBoundary>
         <ErrorBoundary name="Skills"><Skills /></ErrorBoundary>
         <ErrorBoundary name="About"><About /></ErrorBoundary>
-       
       </main>
       <Footer />
     </>

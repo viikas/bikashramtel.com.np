@@ -1,56 +1,50 @@
 import { useEffect, useRef } from 'react'
 
 /*
- * "Digital Terrains" — lightweight vanilla Canvas replacement for p5.js.
+ * "Identity Mesh" — layered generative canvas combining:
  *
- * Perlin-inspired noise field with contour iso-lines and ambient particles.
- * Amber at altitude, teal in the valleys.
+ * 1. Constellation network — floating nodes with connection lines (gaming skill tree / neural net)
+ * 2. Circuit board traces — PCB-style paths with glowing junction points (tinkerer)
+ * 3. Floating glyphs — kanji + code symbols drifting upward (otaku + developer)
  *
- * ~80 lines vs 1MB p5.js dependency.
+ * Mouse interaction: nodes subtly gravitate toward cursor.
  */
 
-// Simple 2D noise (permutation-based, good enough for visual effect)
-const PERM = new Uint8Array(512)
-;(() => {
-  const p = new Uint8Array(256)
-  for (let i = 0; i < 256; i++) p[i] = i
-  for (let i = 255; i > 0; i--) {
-    const j = (i * 16807 + 37) % (i + 1) // seeded shuffle
-    ;[p[i], p[j]] = [p[j], p[i]]
-  }
-  for (let i = 0; i < 512; i++) PERM[i] = p[i & 255]
-})()
-
-function fade(t) { return t * t * t * (t * (t * 6 - 15) + 10) }
-function lerp(a, b, t) { return a + t * (b - a) }
-function grad(hash, x, y) {
-  const h = hash & 3
-  return (h < 2 ? (h === 0 ? x : -x) : 0) + (h < 2 ? 0 : h === 2 ? y : -y)
+const COLORS = {
+  amber:  [232, 160, 77],
+  teal:   [77, 232, 196],
+  ember:  [232, 93, 64],
+  cream:  [245, 241, 234],
 }
 
-function noise2d(x, y) {
-  const xi = Math.floor(x) & 255, yi = Math.floor(y) & 255
-  const xf = x - Math.floor(x), yf = y - Math.floor(y)
-  const u = fade(xf), v = fade(yf)
-  const aa = PERM[PERM[xi] + yi], ab = PERM[PERM[xi] + yi + 1]
-  const ba = PERM[PERM[xi + 1] + yi], bb = PERM[PERM[xi + 1] + yi + 1]
-  return lerp(
-    lerp(grad(aa, xf, yf), grad(ba, xf - 1, yf), u),
-    lerp(grad(ab, xf, yf - 1), grad(bb, xf - 1, yf - 1), u),
-    v,
-  ) * 0.5 + 0.5 // normalize to 0–1
-}
+function rgba(c, a) { return `rgba(${c[0]},${c[1]},${c[2]},${a})` }
 
-const COLS = 80, ROWS = 50, SPEED = 0.0004, NUM_PARTICLES = 120
-
-const palette = {
-  bg: [9, 8, 8],
-  high: [232, 160, 77],  // amber
-  low:  [77, 232, 196],  // teal
-}
+// ─── Floating glyphs (kanji + code) ────────────────────────────────
+const GLYPHS = [
+  // Kanji / Japanese
+  '侍', '竜', '風', '光', '夢', '力', '炎', '星', '魂', '道',
+  '刀', '忍', '鬼', '神', '月', '影', '雷', '氷', '剣', '武',
+  '桜', '虎', '海', '空', '心', '闘', '王', '拳', '血', '戦',
+  // Katakana
+  'ア', 'カ', 'サ', 'タ', 'ナ', 'ハ', 'マ', 'ヤ', 'ラ', 'ワ',
+  'ガ', 'ザ', 'ダ', 'バ', 'パ',
+  // Code symbols
+  '{ }', '//', '=>', '&&', '<>', '[]', '::', '**', '$$', '##',
+  '!=', '++', '--', '||', '??', '~>', '<<', '>>', '/*', '*/',
+  '<%', '%>', '$()', '@_', '#!', '&=',
+  // Tech / gaming / dev
+  '0x', 'fn', 'AI', 'GG', 'HP', 'XP', 'LV', 'OK', 'OP',
+  'npm', 'git', 'ssh', 'api', 'jsx', 'css', 'dom', 'tcp',
+  'sudo', 'root', 'null', 'true', 'void', 'async', 'React',
+  // Emoticon fragments
+  '^_^', '-_-', 'o_O', '>.<', ':3',
+  // Binary / hex
+  '01', '10', '0xFF', '1010', '0b01',
+]
 
 export default function ArtCanvas({ style }) {
   const canvasRef = useRef(null)
+  const mouseRef = useRef({ x: -1000, y: -1000 })
   const rafRef = useRef(null)
 
   useEffect(() => {
@@ -65,81 +59,184 @@ export default function ArtCanvas({ style }) {
     resize()
     window.addEventListener('resize', resize)
 
-    // Particles
-    const particles = Array.from({ length: NUM_PARTICLES }, () => ({
+    const onMouse = (e) => {
+      const rect = canvas.getBoundingClientRect()
+      mouseRef.current = { x: e.clientX - rect.left, y: e.clientY - rect.top }
+    }
+    window.addEventListener('mousemove', onMouse, { passive: true })
+
+    // ── Constellation nodes ──────────────────────────────
+    const NUM_NODES = 45
+    const CONNECT_DIST = 140
+    const nodes = Array.from({ length: NUM_NODES }, () => ({
       x: Math.random() * canvas.width,
       y: Math.random() * canvas.height,
-      vx: 0, vy: 0,
-      life: 80 + Math.random() * 120,
-      maxLife: 0,
-      speed: 0.4 + Math.random() * 0.8,
+      vx: (Math.random() - 0.5) * 0.3,
+      vy: (Math.random() - 0.5) * 0.3,
+      r: 1.5 + Math.random() * 2,
+      color: [COLORS.amber, COLORS.teal, COLORS.ember][Math.floor(Math.random() * 3)],
     }))
-    particles.forEach((p) => (p.maxLife = p.life))
 
-    function resetParticle(p) {
-      p.x = Math.random() * canvas.width
-      p.y = Math.random() * canvas.height
-      p.vx = 0; p.vy = 0
-      p.life = 80 + Math.random() * 120
-      p.maxLife = p.life
-      p.speed = 0.4 + Math.random() * 0.8
+    // ── Circuit traces (static paths) ────────────────────
+    const NUM_TRACES = 12
+    const traces = Array.from({ length: NUM_TRACES }, () => {
+      const startX = Math.random() * canvas.width
+      const startY = Math.random() * canvas.height
+      const segments = []
+      let cx = startX, cy = startY
+      const numSegs = 3 + Math.floor(Math.random() * 5)
+      for (let s = 0; s < numSegs; s++) {
+        // PCB-style: only horizontal or vertical
+        const horizontal = Math.random() > 0.5
+        const len = 30 + Math.random() * 80
+        const nx = horizontal ? cx + (Math.random() > 0.5 ? len : -len) : cx
+        const ny = horizontal ? cy : cy + (Math.random() > 0.5 ? len : -len)
+        segments.push({ x1: cx, y1: cy, x2: nx, y2: ny })
+        cx = nx
+        cy = ny
+      }
+      return {
+        segments,
+        color: Math.random() > 0.5 ? COLORS.teal : COLORS.amber,
+        pulseOffset: Math.random() * Math.PI * 2,
+      }
+    })
+
+    // ── Floating glyphs ──────────────────────────────────
+    const NUM_GLYPHS = 30
+    const glyphs = Array.from({ length: NUM_GLYPHS }, () => ({
+      char: GLYPHS[Math.floor(Math.random() * GLYPHS.length)],
+      x: Math.random() * canvas.width,
+      y: Math.random() * canvas.height,
+      vy: -(0.15 + Math.random() * 0.3),
+      vx: (Math.random() - 0.5) * 0.1,
+      size: 10 + Math.random() * 14,
+      alpha: 0.04 + Math.random() * 0.08,
+      color: [COLORS.amber, COLORS.teal, COLORS.cream][Math.floor(Math.random() * 3)],
+    }))
+
+    function resetGlyph(g) {
+      g.char = GLYPHS[Math.floor(Math.random() * GLYPHS.length)]
+      g.x = Math.random() * canvas.width
+      g.y = canvas.height + 20
+      g.vy = -(0.15 + Math.random() * 0.3)
+      g.vx = (Math.random() - 0.5) * 0.1
+      g.size = 10 + Math.random() * 14
+      g.alpha = 0.04 + Math.random() * 0.08
+      g.color = [COLORS.amber, COLORS.teal, COLORS.cream][Math.floor(Math.random() * 3)]
     }
 
     let t = 0
 
     function draw() {
+      const W = canvas.width, H = canvas.height
+      const mx = mouseRef.current.x, my = mouseRef.current.y
+
       // Soft fade
-      ctx.fillStyle = `rgba(${palette.bg[0]},${palette.bg[1]},${palette.bg[2]},0.07)`
-      ctx.fillRect(0, 0, canvas.width, canvas.height)
+      ctx.fillStyle = 'rgba(9,8,8,0.08)'
+      ctx.fillRect(0, 0, W, H)
 
-      const cw = canvas.width / COLS
-      const ch = canvas.height / ROWS
-      const bands = [0.35, 0.42, 0.50, 0.57, 0.65, 0.72]
+      // ── Layer 1: Circuit traces ──────────────────────
+      for (const trace of traces) {
+        const pulse = (Math.sin(t * 1.5 + trace.pulseOffset) + 1) / 2
+        const alpha = 0.03 + pulse * 0.04
 
-      // Draw contour iso-lines
-      for (let y = 0; y < ROWS; y++) {
-        for (let x = 0; x < COLS; x++) {
-          const nx = x / COLS * 2.5
-          const ny = y / ROWS * 2.5
-          const n = noise2d(nx + t * 0.3, ny + t * 0.3)
+        ctx.strokeStyle = rgba(trace.color, alpha)
+        ctx.lineWidth = 0.8
+        ctx.beginPath()
+        for (const seg of trace.segments) {
+          ctx.moveTo(seg.x1, seg.y1)
+          ctx.lineTo(seg.x2, seg.y2)
+        }
+        ctx.stroke()
 
-          for (let b = 0; b < bands.length; b++) {
-            if (Math.abs(n - bands[b]) < 0.018) {
-              const frac = b / (bands.length - 1)
-              const r = lerp(palette.low[0], palette.high[0], frac)
-              const g = lerp(palette.low[1], palette.high[1], frac)
-              const bl = lerp(palette.low[2], palette.high[2], frac)
-              const a = lerp(0.15, 0.22, frac)
-              ctx.fillStyle = `rgba(${r|0},${g|0},${bl|0},${a})`
-              ctx.fillRect(x * cw + cw * 0.5, y * ch + ch * 0.5, 1.2, 1.2)
-            }
+        // Junction dots
+        for (const seg of trace.segments) {
+          ctx.fillStyle = rgba(trace.color, alpha + 0.04)
+          ctx.beginPath()
+          ctx.arc(seg.x2, seg.y2, 1.5, 0, Math.PI * 2)
+          ctx.fill()
+        }
+      }
+
+      // ── Layer 2: Constellation network ───────────────
+      // Update nodes
+      for (const n of nodes) {
+        // Mouse attraction
+        const dx = mx - n.x, dy = my - n.y
+        const dist = Math.sqrt(dx * dx + dy * dy)
+        if (dist < 200 && dist > 0) {
+          const force = 0.015 * (1 - dist / 200)
+          n.vx += (dx / dist) * force
+          n.vy += (dy / dist) * force
+        }
+
+        n.x += n.vx
+        n.y += n.vy
+
+        // Damping
+        n.vx *= 0.995
+        n.vy *= 0.995
+
+        // Wrap edges
+        if (n.x < 0) n.x = W
+        if (n.x > W) n.x = 0
+        if (n.y < 0) n.y = H
+        if (n.y > H) n.y = 0
+      }
+
+      // Draw connections
+      for (let i = 0; i < nodes.length; i++) {
+        for (let j = i + 1; j < nodes.length; j++) {
+          const dx = nodes[i].x - nodes[j].x
+          const dy = nodes[i].y - nodes[j].y
+          const d = Math.sqrt(dx * dx + dy * dy)
+          if (d < CONNECT_DIST) {
+            const alpha = (1 - d / CONNECT_DIST) * 0.08
+            ctx.strokeStyle = rgba(nodes[i].color, alpha)
+            ctx.lineWidth = 0.5
+            ctx.beginPath()
+            ctx.moveTo(nodes[i].x, nodes[i].y)
+            ctx.lineTo(nodes[j].x, nodes[j].y)
+            ctx.stroke()
           }
         }
       }
 
-      // Particles
-      for (const p of particles) {
-        const nx = p.x / canvas.width * 3
-        const ny = p.y / canvas.height * 3
-        const angle = noise2d(nx, ny + t * 2) * Math.PI * 4
-        const mag = p.speed
+      // Draw nodes
+      for (const n of nodes) {
+        // Glow
+        ctx.fillStyle = rgba(n.color, 0.04)
+        ctx.beginPath()
+        ctx.arc(n.x, n.y, n.r * 4, 0, Math.PI * 2)
+        ctx.fill()
 
-        p.vx = p.vx * 0.85 + Math.cos(angle) * mag * 0.15
-        p.vy = p.vy * 0.85 + Math.sin(angle) * mag * 0.15
-        p.x += p.vx
-        p.y += p.vy
-        p.life--
-
-        if (p.life <= 0 || p.x < 0 || p.x > canvas.width || p.y < 0 || p.y > canvas.height) {
-          resetParticle(p)
-        }
-
-        const alpha = (p.life / p.maxLife) * 0.055
-        ctx.fillStyle = `rgba(${palette.high[0]},${palette.high[1]},${palette.high[2]},${alpha})`
-        ctx.fillRect(p.x, p.y, 1, 1)
+        // Core
+        ctx.fillStyle = rgba(n.color, 0.2)
+        ctx.beginPath()
+        ctx.arc(n.x, n.y, n.r, 0, Math.PI * 2)
+        ctx.fill()
       }
 
-      t += SPEED
+      // ── Layer 3: Floating glyphs ─────────────────────
+      ctx.textAlign = 'center'
+      ctx.textBaseline = 'middle'
+      for (const g of glyphs) {
+        g.x += g.vx
+        g.y += g.vy
+
+        if (g.y < -30) resetGlyph(g)
+
+        // Fade near edges
+        const edgeFade = Math.min(g.y / 100, (H - g.y) / 100, 1)
+        const a = g.alpha * Math.max(0, edgeFade)
+
+        ctx.font = `${g.size}px "JetBrains Mono", monospace`
+        ctx.fillStyle = rgba(g.color, a)
+        ctx.fillText(g.char, g.x, g.y)
+      }
+
+      t += 0.008
       rafRef.current = requestAnimationFrame(draw)
     }
 
@@ -148,6 +245,7 @@ export default function ArtCanvas({ style }) {
     return () => {
       cancelAnimationFrame(rafRef.current)
       window.removeEventListener('resize', resize)
+      window.removeEventListener('mousemove', onMouse)
     }
   }, [])
 
@@ -165,7 +263,7 @@ export default function ArtCanvas({ style }) {
     >
       <canvas
         ref={canvasRef}
-        style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}
+        style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', pointerEvents: 'auto' }}
       />
     </div>
   )

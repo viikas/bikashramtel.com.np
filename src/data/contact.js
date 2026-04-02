@@ -33,12 +33,12 @@ export const contactInfo = [
   },
   {
     label: '+977 9849163149 (WhatsApp)',
-    href:  '#',
-    external: false,
+    href:  'https://wa.me/9779849163149',
+    external: true,
   },
   {
     label: 'Kathmandu, Nepal',
-    href:  '#',
-    external: false,
+    href:  'https://maps.google.com/?q=Kathmandu,Nepal',
+    external: true,
   },
 ]
