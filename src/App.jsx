@@ -20,9 +20,10 @@ export default function App() {
         <ErrorBoundary name="DIY"><DIY /></ErrorBoundary>
         <ErrorBoundary name="Anime"><Anime /></ErrorBoundary>
         <ErrorBoundary name="Movies"><Movies /></ErrorBoundary>
-        <ErrorBoundary name="About"><About /></ErrorBoundary>
         <ErrorBoundary name="Art"><Art /></ErrorBoundary>
         <ErrorBoundary name="Skills"><Skills /></ErrorBoundary>
+        <ErrorBoundary name="About"><About /></ErrorBoundary>
+       
       </main>
       <Footer />
     </>
