@@ -1,13 +1,12 @@
 .hero {
   position: relative;
   height: 100svh;
-  min-height: 600px;
+  min-height: 650px;
   overflow: hidden;
   display: flex;
   align-items: center;
 }
 
-/* Dark gradient backdrop */
 .backdrop {
   position: absolute;
   inset: 0;
@@ -18,22 +17,17 @@
     var(--bg);
 }
 
-/* CRT scanline effect */
 .scanlines {
   position: absolute;
   inset: 0;
   z-index: 1;
   background: repeating-linear-gradient(
-    0deg,
-    transparent,
-    transparent 2px,
-    rgba(0, 0, 0, 0.03) 2px,
-    rgba(0, 0, 0, 0.03) 4px
+    0deg, transparent, transparent 2px,
+    rgba(0, 0, 0, 0.03) 2px, rgba(0, 0, 0, 0.03) 4px
   );
   pointer-events: none;
 }
 
-/* Subtle grid pattern */
 .grid {
   position: absolute;
   inset: 0;
@@ -45,16 +39,24 @@
   pointer-events: none;
 }
 
-/* Content */
-.content {
+/* Two-column layout */
+.heroInner {
   position: relative;
   z-index: 4;
-  padding: 0 6%;
-  max-width: 900px;
   width: 100%;
+  padding: 0 6%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 40px;
 }
 
-/* Status indicator */
+/* Left — Content */
+.content {
+  max-width: 560px;
+  flex: 1;
+}
+
 .status {
   display: inline-flex;
   align-items: center;
@@ -88,14 +90,13 @@
   color: var(--teal);
 }
 
-/* Heading */
 .heading {
   margin-bottom: 24px;
 }
 
 .name {
   font-family: var(--font-display);
-  font-size: clamp(3rem, 7vw, 6rem);
+  font-size: clamp(2.8rem, 5.5vw, 5rem);
   font-weight: 900;
   letter-spacing: -3px;
   line-height: 1;
@@ -112,27 +113,26 @@
 
 .iAm {
   font-family: var(--font-body);
-  font-size: clamp(1.2rem, 2.5vw, 1.8rem);
+  font-size: clamp(1.1rem, 2vw, 1.5rem);
   color: var(--muted);
   font-weight: 400;
 }
 
 .identitySlot {
   display: inline-flex;
-  min-width: 200px;
+  min-width: 170px;
   overflow: hidden;
 }
 
 .identity {
   font-family: var(--font-display);
-  font-size: clamp(1.8rem, 4vw, 3.2rem);
+  font-size: clamp(1.6rem, 3.2vw, 2.6rem);
   font-weight: 900;
   font-style: italic;
   letter-spacing: -1px;
   display: inline-block;
 }
 
-/* Subtitle */
 .subtitleWrap {
   min-height: 60px;
   margin-bottom: 28px;
@@ -140,14 +140,13 @@
 
 .subtitle {
   font-family: var(--font-body);
-  font-size: clamp(1.05rem, 1.8vw, 1.25rem);
+  font-size: clamp(1rem, 1.6vw, 1.15rem);
   line-height: 1.75;
   color: var(--cream);
   opacity: 0.75;
-  max-width: 560px;
+  max-width: 500px;
 }
 
-/* CTA row */
 .ctaRow {
   display: flex;
   align-items: center;
@@ -187,40 +186,161 @@
   transform: translate(3px, -3px);
 }
 
-/* Identity badges */
-.badges {
+/* ─── Right — Fanned card spread ───────────────────────────────── */
+.cardSide {
+  flex: 0 0 440px;
   display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.badge {
-  display: inline-flex;
   align-items: center;
-  padding: 6px 14px;
-  border: 1px solid var(--muted2);
-  border-radius: 2px;
-  font-family: var(--font-mono);
-  font-size: 0.7rem;
-  font-weight: 500;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--muted);
-  cursor: pointer;
-  transition: all 0.3s var(--ease-out-expo);
+  justify-content: center;
+  perspective: 800px;
 }
 
-.badge:hover {
-  border-color: var(--amber);
+.cardFan {
+  position: relative;
+  width: 320px;
+  height: 420px;
+}
+
+.playerCard {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 320px;
+  background: rgba(9, 8, 8, 0.65);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 20px;
+  cursor: pointer;
+  transform-origin: center bottom;
+  transition: box-shadow 0.3s ease;
+}
+
+.playerCard::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  border-radius: 8px 8px 0 0;
+  background: var(--card-color, var(--amber));
+}
+
+.playerCard::after {
+  content: '';
+  position: absolute;
+  top: -30px;
+  right: -30px;
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  background: var(--card-color, var(--amber));
+  opacity: 0.04;
+  filter: blur(30px);
+  pointer-events: none;
+}
+
+.playerCardActive {
+  border-color: rgba(255, 255, 255, 0.08);
+  box-shadow:
+    0 12px 40px rgba(0, 0, 0, 0.5),
+    0 0 30px rgba(232, 160, 77, 0.06);
+}
+
+.cardHead {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--border);
+}
+
+.cardIcon {
+  font-size: 2.2rem;
+  line-height: 1;
+}
+
+.cardClass {
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  margin-bottom: 2px;
+}
+
+.cardName {
+  font-family: var(--font-body);
+  font-size: 1.05rem;
+  font-weight: 700;
   color: var(--cream);
 }
 
-.badgeActive {
-  background: rgba(232, 160, 77, 0.08);
-  box-shadow: 0 0 20px rgba(232, 160, 77, 0.1);
+.cardStats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 16px;
 }
 
-/* Scroll hint — bouncing chevron */
+.cardStat {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.cardStatValue {
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--cream);
+  letter-spacing: -0.5px;
+}
+
+.cardStatLabel {
+  font-family: var(--font-mono);
+  font-size: 0.5rem;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.xpSection {
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+}
+
+.xpLabel {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--font-mono);
+  font-size: 0.52rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+
+.xpTrack {
+  width: 100%;
+  height: 3px;
+  background: var(--muted2);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.xpFill {
+  width: 100%;
+  height: 100%;
+  border-radius: 2px;
+  transform-origin: left;
+}
+
+/* Scroll hint */
 .scrollHint {
   position: absolute;
   bottom: clamp(28px, 5vw, 50px);
@@ -230,6 +350,7 @@
   flex-direction: column;
   align-items: center;
   gap: 6px;
+  z-index: 5;
 }
 
 .scrollChevron {
@@ -255,19 +376,9 @@
   pointer-events: none;
 }
 
-.cornerTL {
-  top: 80px;
-  left: 6%;
-  border-width: 1px 0 0 1px;
-}
+.cornerTL { top: 80px; left: 6%; border-width: 1px 0 0 1px; }
+.cornerBR { bottom: 28px; right: 6%; border-width: 0 1px 1px 0; }
 
-.cornerBR {
-  bottom: 28px;
-  right: 6%;
-  border-width: 0 1px 1px 0;
-}
-
-/* Bottom accent bar */
 .accentBar {
   position: absolute;
   bottom: 0;
@@ -279,6 +390,44 @@
   transform-origin: left;
 }
 
+/* ─── Responsive ────────────────────────────────────────────────── */
+@media (max-width: 1024px) {
+  .cardSide {
+    flex: 0 0 360px;
+  }
+
+  .cardFan {
+    width: 280px;
+    height: 370px;
+  }
+
+  .playerCard {
+    width: 280px;
+    padding: 18px;
+  }
+}
+
+@media (max-width: 800px) {
+  .heroInner {
+    flex-direction: column;
+    justify-content: center;
+    gap: 30px;
+  }
+
+  .content {
+    max-width: 100%;
+  }
+
+  .cardSide {
+    flex: none;
+    width: 100%;
+  }
+
+  .cardFan {
+    margin: 0 auto;
+  }
+}
+
 @media (max-width: 600px) {
   .name {
     letter-spacing: -1.5px;
@@ -288,19 +437,8 @@
     min-width: 140px;
   }
 
-  .ctaRow {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 16px;
-  }
-
-  .badges {
-    gap: 6px;
-  }
-
-  .badge {
-    padding: 5px 10px;
-    font-size: 0.62rem;
+  .cardSide {
+    display: none;
   }
 
   .corner {

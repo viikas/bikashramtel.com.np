@@ -19,7 +19,7 @@ const COLORS = {
 
 function rgba(c, a) { return `rgba(${c[0]},${c[1]},${c[2]},${a})` }
 
-// ─── Floating glyphs (kanji + code) ────────────────────────────────
+// ─── Floating glyphs (kanji + code + nepali script) ────────────────────────────────
 const GLYPHS = [
   // Kanji / Japanese
   '侍', '竜', '風', '光', '夢', '力', '炎', '星', '魂', '道',
@@ -40,6 +40,8 @@ const GLYPHS = [
   '^_^', '-_-', 'o_O', '>.<', ':3',
   // Binary / hex
   '01', '10', '0xFF', '1010', '0b01',
+  'B', 'I', 'K', 'A', 'S', 'H', 'R', 'A', 'M', 'T', 'E', 'L',
+   'क','ख','ग','घ','ङ','च','छ','ज','झ','ञ','ट','ठ','ड','ढ','ण','त','थ','द','ध','न','प','फ','ब','भ','म','य','र','ल','व','श','ष','स','ह', 'क्ष', 'त्र', 'ज्ञ'
 ]
 
 export default function ArtCanvas({ style }) {
@@ -103,7 +105,7 @@ export default function ArtCanvas({ style }) {
     })
 
     // ── Floating glyphs ──────────────────────────────────
-    const NUM_GLYPHS = 30
+    const NUM_GLYPHS = 50
     const glyphs = Array.from({ length: NUM_GLYPHS }, () => ({
       char: GLYPHS[Math.floor(Math.random() * GLYPHS.length)],
       x: Math.random() * canvas.width,
