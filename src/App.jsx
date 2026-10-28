@@ -9,6 +9,7 @@ import FinishLine    from './components/FinishLine/FinishLine'
 import Hud           from './components/Hud/Hud'
 import useActiveStage from './hooks/useActiveStage'
 import { career }    from './data/career'
+import { hashTarget } from './game/hash'
 
 const STAGE_IDS = career.stages.map(s => s.id)
 
@@ -19,7 +20,7 @@ export default function App() {
 
   // Deep links (e.g. /#stage-portpro) — the sections only exist after React renders.
   useEffect(() => {
-    const id = decodeURIComponent(window.location.hash.slice(1))
+    const id = hashTarget(window.location.hash)
     if (id) document.getElementById(id)?.scrollIntoView()
   }, [])
 

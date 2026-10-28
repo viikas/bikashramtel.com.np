@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react'
+import { resolveActive, sectionOrder } from '../game/activeStage'
 
-const FINISH_IDS = ['loadout', 'pit-stop', 'finish']
 const START = { phase: 'start', stageId: null, index: -1 }
 
 /**
- * Which part of the race the visitor is in, judged by the section crossing
- * a thin line through the middle of the viewport.
+ * Which part of the race the visitor is in, judged by the sections crossing
+ * a thin band through the middle of the viewport. Tracks every section in the
+ * band (entering and leaving) so a small back-scroll restores the earlier one.
  */
 export default function useActiveStage(stageIds) {
   const [active, setActive] = useState(START)
@@ -13,26 +14,21 @@ export default function useActiveStage(stageIds) {
 
   useEffect(() => {
     const ids = key.split(',')
-    const toState = (sectionId) => {
-      if (sectionId === 'start') return START
-      if (FINISH_IDS.includes(sectionId)) return { phase: 'finish', stageId: null, index: -1 }
-      const index = ids.indexOf(sectionId.replace(/^stage-/, ''))
-      return index === -1 ? null : { phase: 'stage', stageId: ids[index], index }
-    }
+    const visible = new Set()
 
     const observer = new IntersectionObserver(
       (entries) => {
         for (const entry of entries) {
-          if (!entry.isIntersecting) continue
-          const next = toState(entry.target.id)
-          if (next) setActive(next)
+          if (entry.isIntersecting) visible.add(entry.target.id)
+          else visible.delete(entry.target.id)
         }
+        const next = resolveActive(visible, ids)
+        if (next) setActive(next)
       },
       { rootMargin: '-45% 0px -45% 0px' },
     )
 
-    const sectionIds = ['start', ...ids.map(id => `stage-${id}`), ...FINISH_IDS]
-    for (const id of sectionIds) {
+    for (const id of sectionOrder(ids)) {
       const el = document.getElementById(id)
       if (el) observer.observe(el)
     }

@@ -1,21 +1,28 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import { useInView, useReducedMotion } from 'framer-motion'
 import styles from './FinishLine.module.css'
 import { career } from '../../data/career'
 import { socialLinks, contactInfo } from '../../data/contact'
+import { countdownValue } from '../../game/countdown'
 
 export default function FinishLine() {
-  const [count, setCount] = useState(9)
+  const ref = useRef(null)
+  const reached = useInView(ref, { once: true, amount: 0.3 })
+  const reducedMotion = useReducedMotion()
+  const [count, setCount] = useState(countdownValue(null, 0))
 
+  // The countdown starts when the visitor reaches the finish, then loops.
   useEffect(() => {
-    if (count === 0) return
-    const id = setTimeout(() => setCount(c => c - 1), 1000)
-    return () => clearTimeout(id)
-  }, [count])
+    if (!reached || reducedMotion) return
+    const startedAt = Date.now()
+    const id = setInterval(() => setCount(countdownValue(startedAt, Date.now())), 250)
+    return () => clearInterval(id)
+  }, [reached, reducedMotion])
 
   const linkProps = external => (external ? { target: '_blank', rel: 'noopener noreferrer' } : {})
 
   return (
-    <section id="finish" className={styles.finish} aria-labelledby="finish-title">
+    <section id="finish" ref={ref} className={styles.finish} aria-labelledby="finish-title">
       <div className={styles.flag} aria-hidden="true" />
       <div className={`pixel-panel ${styles.panel}`}>
         <h2 id="finish-title" className={`pixel-heading ${styles.title}`}>

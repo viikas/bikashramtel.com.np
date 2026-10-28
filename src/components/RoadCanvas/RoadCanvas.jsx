@@ -4,6 +4,7 @@ import styles from './RoadCanvas.module.css'
 import { projectRoad } from '../../game/road'
 import { nextSpeed } from '../../game/speed'
 import { sceneryFor } from '../../game/scenery'
+import { canvasLayout } from '../../game/viewport'
 import { PALETTE as C, drawSky, drawHills, drawBike, drawSprite } from './sprites'
 
 /*
@@ -19,14 +20,17 @@ const SPRITE_SIZE = 2.6      // sprite local units → pixels at the bottom row
 
 const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v))
 
-// Whole-number pixel size so pixels stay square on any viewport.
-function internalSize(cssW, cssH) {
-  const px = clamp(Math.round(Math.min(cssW, cssH) / 180), 2, 6)
-  return { width: Math.ceil(cssW / px), height: Math.ceil(cssH / px) }
+// The desktop HUD covers the bottom edge; on phones it sits at the top.
+function hudInset() {
+  if (window.matchMedia('(max-width: 720px)').matches) return 0
+  return parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--hud-h-desktop')) || 88
 }
 
-function drawFrame(ctx, bg, width, height, offset, lean, bob, kinds) {
-  const horizon = Math.round(height * 0.5)
+// The scene is composed above `groundBottom` so the bike isn't hidden by the HUD.
+const horizonFor = groundBottom => Math.round(groundBottom * 0.5)
+
+function drawFrame(ctx, bg, width, height, groundBottom, offset, lean, bob, kinds) {
+  const horizon = horizonFor(groundBottom)
   ctx.drawImage(bg, 0, 0)
 
   const rows = projectRoad({ width, height, horizon, offset })
@@ -66,7 +70,7 @@ function drawFrame(ctx, bg, width, height, offset, lean, bob, kinds) {
     drawSprite(ctx, kind, x, y, scale * SPRITE_SIZE)
   }
 
-  drawBike(ctx, Math.round(width / 2), height - 4 - bob, lean)
+  drawBike(ctx, Math.round(width / 2), groundBottom - 4 - bob, lean)
 }
 
 export default function RoadCanvas({ activeStageId = null }) {
@@ -89,6 +93,7 @@ export default function RoadCanvas({ activeStageId = null }) {
 
     let width = 0
     let height = 0
+    let groundBottom = 0
     let bgStage
     let offset = 0
     let speed = 0
@@ -98,7 +103,7 @@ export default function RoadCanvas({ activeStageId = null }) {
     let raf = 0
 
     const buildBackground = () => {
-      const horizon = Math.round(height * 0.5)
+      const horizon = horizonFor(groundBottom)
       bg.width = width
       bg.height = height
       drawSky(bgCtx, width, horizon)
@@ -109,16 +114,21 @@ export default function RoadCanvas({ activeStageId = null }) {
     }
 
     const resize = () => {
-      const size = internalSize(canvas.clientWidth || window.innerWidth, canvas.clientHeight || window.innerHeight)
-      width = canvas.width = size.width
-      height = canvas.height = size.height
+      const layout = canvasLayout({
+        cssWidth: canvas.clientWidth || window.innerWidth,
+        cssHeight: canvas.clientHeight || window.innerHeight,
+        hudInset: hudInset(),
+      })
+      width = canvas.width = layout.width
+      height = canvas.height = layout.height
+      groundBottom = layout.groundBottom
       buildBackground()
     }
 
     const render = () => {
       if (bgStage !== stageRef.current) buildBackground()
       const bob = reducedMotion ? 0 : Math.floor(offset / 90) % 2
-      drawFrame(ctx, bg, width, height, offset, lean, bob, sceneryFor(stageRef.current))
+      drawFrame(ctx, bg, width, height, groundBottom, offset, lean, bob, sceneryFor(stageRef.current))
     }
 
     const tick = (t) => {
