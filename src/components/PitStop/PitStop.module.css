@@ -1,0 +1,71 @@
+.pitStop {
+  position: relative;
+  padding: 16vh 16px;
+}
+
+.panel {
+  max-width: 560px;
+  margin: 0 auto;
+  padding: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.title { font-size: 0.9rem; }
+
+.intro {
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.label {
+  font-family: var(--font-pixel);
+  font-size: 0.55rem;
+  color: var(--rumble-dark);
+}
+
+.facts {
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.fact {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px;
+  background: var(--white);
+  border: 2px solid var(--ink);
+}
+
+.factValue {
+  font-family: var(--font-pixel);
+  font-size: 0.75rem;
+}
+
+.factLabel {
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+@media (max-width: 420px) {
+  .facts { grid-template-columns: repeat(2, 1fr); }
+}

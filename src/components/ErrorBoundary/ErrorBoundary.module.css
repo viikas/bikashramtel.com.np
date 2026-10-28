@@ -27,7 +27,7 @@
 
 .retry {
   padding: 10px 16px;
-  background: var(--rumble);
+  background: var(--rumble-dark);
   color: var(--white);
   border: 4px solid var(--ink);
   box-shadow: 4px 4px 0 var(--ink);

@@ -1,0 +1,98 @@
+.stage {
+  position: relative;
+  padding: 20vh 16px;
+}
+
+.panel {
+  position: relative;
+  max-width: 680px;
+  margin: 0 auto;
+  padding: clamp(20px, 4vw, 32px);
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.current {
+  max-width: 860px;
+  background: var(--white);
+}
+
+.ribbon {
+  position: absolute;
+  top: -18px;
+  right: 16px;
+  padding: 8px 10px;
+  background: var(--sun);
+  border: 3px solid var(--ink);
+  font-family: var(--font-pixel);
+  font-size: 0.55rem;
+  text-transform: uppercase;
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.badge {
+  padding: 6px 8px;
+  background: var(--rumble-dark);
+  color: var(--white);
+  border: 3px solid var(--ink);
+  font-family: var(--font-pixel);
+  font-size: 0.6rem;
+  text-transform: uppercase;
+}
+
+.company {
+  font-size: clamp(0.95rem, 3.2vw, 1.4rem);
+}
+
+.meta {
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.bullets {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-left: 0;
+  list-style: none;
+  font-size: 1.05rem;
+  line-height: 1.6;
+}
+
+.bullets li {
+  position: relative;
+  padding-left: 22px;
+}
+
+.bullets li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0.6em;
+  width: 10px;
+  height: 10px;
+  background: var(--rumble-dark);
+  box-shadow: 2px 2px 0 var(--ink);
+}
+
+.chips {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.chip {
+  padding: 6px 8px;
+  background: var(--sky-2);
+  border: 2px solid var(--ink);
+  font-family: var(--font-pixel);
+  font-size: 0.55rem;
+}

@@ -16,6 +16,7 @@
 
   /* Accents */
   --rumble: #e83b3b;
+  --rumble-dark: #c0262a; /* AA-safe red for small text and white-on-red buttons */
   --white:  #ffffff;
   --sun:    #ffd93b;
 
@@ -105,7 +106,7 @@ section { scroll-margin-top: 16px; }
   align-items: center;
   gap: 10px;
   padding: 12px 18px;
-  background: var(--rumble);
+  background: var(--rumble-dark);
   color: var(--white);
   font-family: var(--font-pixel);
   font-size: 0.7rem;

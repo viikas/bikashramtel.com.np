@@ -11,7 +11,7 @@ export const career = {
     "Lead Software Engineer with 12+ years building production web platforms and 5+ years leading the Container Tracking module of PortPro's drayage TMS, used by 550+ trucking companies. Owns technical direction for a real-time system tracking 100,000+ containers across North American port, rail, and terminal systems. Hands-on with Node.js, React, MongoDB, and PostgreSQL, and has shipped LLM-based extraction and automation to production.",
   headline: {
     company: 'PortPro',
-    role: 'Lead Software Engineer · Container Tracking',
+    role: 'Leading Container Tracking',
     stats: [
       { label: 'YEARS', value: '12+' },
       { label: 'CONTAINERS TRACKED', value: '100,000+' },
