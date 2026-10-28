@@ -83,8 +83,20 @@ button {
 
 section { scroll-margin-top: 16px; }
 
+/* Content rides above the road canvas and clears the fixed HUD. */
+main {
+  position: relative;
+  z-index: 1;
+  padding-bottom: var(--hud-h-desktop);
+}
+
 @media (max-width: 720px) {
   section { scroll-margin-top: calc(var(--hud-h-mobile) + 12px); }
+
+  main {
+    padding-top: var(--hud-h-mobile);
+    padding-bottom: 0;
+  }
 }
 
 /* ─── Pixel utilities ──────────────────────────────────────────────────── */
