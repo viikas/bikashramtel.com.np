@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 import ErrorBoundary from './components/ErrorBoundary/ErrorBoundary'
+import RoadCanvas    from './components/RoadCanvas/RoadCanvas'
 import StartLine     from './components/StartLine/StartLine'
 import Stage         from './components/Stage/Stage'
 import Loadout       from './components/Loadout/Loadout'
@@ -21,6 +22,7 @@ export default function App() {
       <a href="#main" className="sr-only" style={{ position: 'absolute', top: 0, left: 0, zIndex: 9999, padding: '12px 24px', background: 'var(--rumble-dark)', color: 'var(--white)', fontWeight: 700 }}>
         Skip to content
       </a>
+      <RoadCanvas activeStageId={null} />
       <main id="main" role="main" style={{ position: 'relative', zIndex: 1 }}>
         <ErrorBoundary name="Start"><StartLine onStart={startRace} /></ErrorBoundary>
         {career.stages.map((stage, i) => (
