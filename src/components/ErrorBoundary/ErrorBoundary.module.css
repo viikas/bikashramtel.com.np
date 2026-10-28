@@ -1,39 +1,43 @@
 .fallback {
-  padding: 60px 6%;
+  position: relative;
+  z-index: 1;
+  max-width: 560px;
+  margin: 60px auto;
+  padding: 28px 24px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 12px;
+  gap: 14px;
   text-align: center;
+  background: var(--cream);
+  border: 4px solid var(--ink);
+  box-shadow: 6px 6px 0 var(--ink);
 }
 
 .icon {
   font-size: 1.5rem;
-  opacity: 0.6;
 }
 
 .text {
-  font-family: var(--font-mono);
-  font-size: 0.78rem;
-  color: var(--muted);
-  letter-spacing: 0.04em;
+  font-family: var(--font-pixel);
+  font-size: 0.7rem;
+  line-height: 1.7;
+  color: var(--ink);
 }
 
 .retry {
-  padding: 8px 20px;
-  border: 1px solid var(--muted2);
-  border-radius: 2px;
-  font-family: var(--font-mono);
-  font-size: 0.7rem;
-  font-weight: 600;
-  letter-spacing: 0.08em;
+  padding: 10px 16px;
+  background: var(--rumble);
+  color: var(--white);
+  border: 4px solid var(--ink);
+  box-shadow: 4px 4px 0 var(--ink);
+  font-family: var(--font-pixel);
+  font-size: 0.6rem;
   text-transform: uppercase;
-  color: var(--muted);
   cursor: pointer;
-  transition: all 0.25s ease;
 }
 
-.retry:hover {
-  border-color: var(--amber);
-  color: var(--amber);
+.retry:active {
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0 var(--ink);
 }
