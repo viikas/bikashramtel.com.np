@@ -1,29 +1,36 @@
-/* ─── Midnight Amber Design System ─────────────────────────────────────── */
+/* ─── Daytime 16-bit Design System ─────────────────────────────────────── */
 :root {
-  /* Colours */
-  --bg:       #090808;
-  --surface:  #110f0d;
-  --card:     #1a1714;
-  --border:   rgba(232, 160, 77, 0.1);
-  --glass:    rgba(232, 160, 77, 0.04);
+  /* Sky */
+  --sky-1: #7ec8f5;
+  --sky-2: #a6dcfa;
+  --sky-3: #cdeefe;
 
-  --amber:    #e8a04d;
-  --ember:    #e85d40;
-  --teal:     #4de8c4;
-  --cream:    #f5f1ea;
-  --muted:    #9a938a;
-  --muted2:   #5a5450;
+  /* Grass */
+  --grass-1: #8fd16a;
+  --grass-2: #7cc35a;
+  --grass-3: #3d8f3a;
+
+  /* Road */
+  --road-1: #7a7a86;
+  --road-2: #6c6c78;
+
+  /* Accents */
+  --rumble: #e83b3b;
+  --rumble-dark: #c0262a; /* AA-safe red for small text and white-on-red buttons */
+  --white:  #ffffff;
+  --sun:    #ffd93b;
+
+  /* Text and panels */
+  --ink:   #1b1b2f;
+  --cream: #f4efe2;
 
   /* Typography */
-  --font-display: 'Fraunces', Georgia, serif;
-  --font-body:    'Syne', system-ui, sans-serif;
-  --font-mono:    'JetBrains Mono', 'Courier New', monospace;
+  --font-pixel: 'Press Start 2P', monospace;
+  --font-body:  'Chakra Petch', system-ui, sans-serif;
 
-  /* Spacing */
-  --section-pad: clamp(48px, 6vw, 80px) 6%;
-
-  /* Motion */
-  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  /* HUD */
+  --hud-h-desktop: 88px;
+  --hud-h-mobile:  56px;
 }
 
 /* ─── Reset ────────────────────────────────────────────────────────────── */
@@ -34,15 +41,18 @@
 }
 
 html {
-  scroll-behavior: smooth;
   overflow-x: hidden;
   font-size: 16px;
 }
 
+@media (prefers-reduced-motion: no-preference) {
+  html { scroll-behavior: smooth; }
+}
+
 body {
   font-family: var(--font-body);
-  background: var(--bg);
-  color: var(--cream);
+  background: var(--sky-3);
+  color: var(--ink);
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -65,10 +75,79 @@ button {
   font-family: inherit;
 }
 
-/* ─── Scrollbar ─────────────────────────────────────────────────────────── */
-::-webkit-scrollbar       { width: 5px; }
-::-webkit-scrollbar-track { background: var(--bg); }
-::-webkit-scrollbar-thumb { background: var(--amber); border-radius: 3px; }
+:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 5px var(--sun);
+}
+
+/* Anchor jumps and keyboard focus stay clear of the fixed HUD. */
+html {
+  scroll-padding-top: 16px;
+  scroll-padding-bottom: calc(var(--hud-h-desktop) + 12px);
+}
+
+/* Content rides above the road canvas and clears the fixed HUD. */
+main {
+  position: relative;
+  z-index: 1;
+  padding-bottom: var(--hud-h-desktop);
+}
+
+/* Compact HUD (top bar) — keep in sync with COMPACT_HUD_QUERY in src/game/viewport.js. */
+@media (max-width: 720px), (max-height: 500px) {
+  html {
+    scroll-padding-top: calc(var(--hud-h-mobile) + 12px);
+    scroll-padding-bottom: 12px;
+  }
+
+  main {
+    padding-top: var(--hud-h-mobile);
+    padding-bottom: 0;
+  }
+}
+
+/* ─── Pixel utilities ──────────────────────────────────────────────────── */
+.pixel-panel {
+  background: var(--cream);
+  border: 4px solid var(--ink);
+  box-shadow: 6px 6px 0 var(--ink);
+}
+
+.pixel-heading {
+  font-family: var(--font-pixel);
+  color: var(--ink);
+  text-transform: uppercase;
+  line-height: 1.5;
+}
+
+.pixel-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 18px;
+  background: var(--rumble-dark);
+  color: var(--white);
+  font-family: var(--font-pixel);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  line-height: 1.4;
+  border: 4px solid var(--ink);
+  box-shadow: 4px 4px 0 var(--ink);
+}
+
+.pixel-btn:active {
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0 var(--ink);
+}
+
+.blink { animation: blink 1s steps(1) infinite; }
+
+@keyframes blink { 50% { opacity: 0; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .blink { animation: none; }
+}
 
 /* ─── Utility ───────────────────────────────────────────────────────────── */
 .sr-only {
@@ -89,13 +168,4 @@ button {
   overflow: visible;
   clip: auto;
   white-space: normal;
-}
-
-/* ─── Glow orbs ─────────────────────────────────────────────────────────── */
-.glow-orb {
-  position: absolute;
-  border-radius: 50%;
-  filter: blur(90px);
-  pointer-events: none;
-  z-index: 0;
 }
