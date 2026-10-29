@@ -38,7 +38,7 @@ export default class ErrorBoundary extends Component {
     if (this.state.hasError) {
       const { icon, text, btn } = this.state.message
       return (
-        <section className={styles.fallback}>
+        <section id={this.props.id} className={styles.fallback}>
           <span className={styles.icon}>{icon}</span>
           <p className={styles.text}>{text}</p>
           <button

@@ -13,7 +13,12 @@ import { hashTarget } from './game/hash'
 
 const STAGE_IDS = career.stages.map(s => s.id)
 
-const startRace = () => document.getElementById(`stage-${career.stages[0].id}`)?.scrollIntoView()
+// Scroll to the first stage and move keyboard focus there too.
+const startRace = () => {
+  const first = document.getElementById(`stage-${career.stages[0].id}`)
+  first?.scrollIntoView()
+  first?.focus({ preventScroll: true })
+}
 
 export default function App() {
   const active = useActiveStage(STAGE_IDS)
@@ -26,22 +31,22 @@ export default function App() {
 
   return (
     <>
-      <a href="#main" className="sr-only" style={{ position: 'absolute', top: 0, left: 0, zIndex: 9999, padding: '12px 24px', background: 'var(--rumble-dark)', color: 'var(--white)', fontWeight: 700 }}>
+      <a href="#main" className="sr-only" style={{ position: 'absolute', top: 0, left: 0, zIndex: 9999, padding: '12px 24px', background: 'var(--rumble-dark)', color: 'var(--white)', fontWeight: 600 }}>
         Skip to content
       </a>
       <RoadCanvas activeStageId={active.stageId} />
+      <Hud {...active} />
       <main id="main" role="main">
-        <ErrorBoundary name="Start"><StartLine onStart={startRace} /></ErrorBoundary>
+        <ErrorBoundary name="Start" id="start"><StartLine onStart={startRace} /></ErrorBoundary>
         {career.stages.map((stage, i) => (
-          <ErrorBoundary key={stage.id} name={stage.company}>
+          <ErrorBoundary key={stage.id} name={stage.company} id={`stage-${stage.id}`}>
             <Stage stage={stage} isCurrentLap={i === 0} />
           </ErrorBoundary>
         ))}
-        <ErrorBoundary name="Loadout"><Loadout /></ErrorBoundary>
-        <ErrorBoundary name="PitStop"><PitStop /></ErrorBoundary>
-        <ErrorBoundary name="Finish"><FinishLine /></ErrorBoundary>
+        <ErrorBoundary name="Loadout" id="loadout"><Loadout /></ErrorBoundary>
+        <ErrorBoundary name="PitStop" id="pit-stop"><PitStop /></ErrorBoundary>
+        <ErrorBoundary name="Finish" id="finish"><FinishLine /></ErrorBoundary>
       </main>
-      <Hud {...active} />
     </>
   )
 }

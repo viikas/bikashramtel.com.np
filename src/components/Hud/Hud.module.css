@@ -34,6 +34,25 @@
   text-overflow: ellipsis;
 }
 
+.xpTop {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.mph {
+  font-family: var(--font-pixel);
+  font-size: 0.85rem;
+  color: var(--rumble-dark);
+}
+
+.mphUnit {
+  margin-left: 4px;
+  font-size: 0.45rem;
+  color: var(--ink);
+}
+
 .gauge {
   height: 16px;
   border: 2px solid var(--ink);
@@ -84,6 +103,13 @@
   z-index: 2;
 }
 
+/* Bigger invisible hit area for thumbs. */
+.checkpoint::before {
+  content: '';
+  position: absolute;
+  inset: -7px;
+}
+
 .ahead   { background: var(--white); color: var(--ink); }
 .passed  { background: var(--ink); color: var(--white); }
 .current { background: var(--rumble-dark); color: var(--white); }
@@ -103,7 +129,7 @@
   .marker, .gaugeFill { transition: none; }
 }
 
-@media (max-width: 720px) {
+@media (max-width: 720px), (max-height: 500px) {
   .hud {
     top: 0;
     bottom: auto;

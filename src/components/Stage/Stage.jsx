@@ -5,7 +5,7 @@ export default function Stage({ stage, isCurrentLap = false }) {
   const meta = [stage.role, stage.place, stage.dates].filter(Boolean)
 
   return (
-    <section id={`stage-${stage.id}`} className={styles.stage} aria-labelledby={titleId}>
+    <section id={`stage-${stage.id}`} className={styles.stage} aria-labelledby={titleId} tabIndex={-1}>
       <article className={`pixel-panel ${styles.panel} ${isCurrentLap ? styles.current : ''}`}>
         {isCurrentLap && <span className={styles.ribbon}>Current lap</span>}
 

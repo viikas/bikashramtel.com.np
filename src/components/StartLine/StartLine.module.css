@@ -91,7 +91,7 @@
   line-height: 1.6;
 }
 
-@media (max-width: 720px) {
+@media (max-width: 720px), (max-height: 500px) {
   .start {
     padding-top: 20px;
     padding-bottom: 28vh;

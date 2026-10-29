@@ -1,83 +1,35 @@
 import { useEffect, useRef } from 'react'
-import { useReducedMotion } from 'framer-motion'
 import styles from './RoadCanvas.module.css'
-import { projectRoad } from '../../game/road'
-import { nextSpeed } from '../../game/speed'
-import { sceneryFor } from '../../game/scenery'
-import { canvasLayout } from '../../game/viewport'
-import { PALETTE as C, drawSky, drawHills, drawBike, drawSprite } from './sprites'
+import usePrefersReducedMotion from '../../hooks/usePrefersReducedMotion'
+import { curveAt } from '../../game/road'
+import { nextSpeed, normalizedDelta, toMph, OFFSET_PER_SPEED } from '../../game/speed'
+import { spawnRivals, stepRivals } from '../../game/rivals'
+import { canvasLayout, COMPACT_HUD_QUERY } from '../../game/viewport'
+import { publishMph } from '../../game/telemetry'
+import { drawScene, paintSky, farZFor, NEAR_Z } from './scene'
 
 /*
  * Fixed full-viewport road. Rendered at low resolution with square pixels and
  * scaled up by CSS (image-rendering: pixelated). Scrolling feeds nextSpeed();
- * the stripes and roadside sprites advance with it.
+ * the stripes, bends, roadside sprites and rival riders advance with it.
  */
 
-const CAMERA_HEIGHT = 1000   // must match projectRoad's default
-const OFFSET_PER_SPEED = 4   // speed units → road units/sec (idle ≈ 0.8 stripes/s, max ≈ 12)
-const SPRITE_SPACING = 700   // road units between roadside objects
-const SPRITE_SIZE = 2.6      // sprite local units → pixels at the bottom row
+const HILL_PARALLAX = 0.004  // road units → background pixels of sideways drift on a bend
+const MPH_INTERVAL = 100     // ms between speedometer updates
 
 const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v))
 
-// The desktop HUD covers the bottom edge; on phones it sits at the top.
+// The desktop HUD covers the bottom edge; the compact HUD sits at the top.
 function hudInset() {
-  if (window.matchMedia('(max-width: 720px)').matches) return 0
+  if (window.matchMedia(COMPACT_HUD_QUERY).matches) return 0
   return parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--hud-h-desktop')) || 88
-}
-
-// The scene is composed above `groundBottom` so the bike isn't hidden by the HUD.
-const horizonFor = groundBottom => Math.round(groundBottom * 0.5)
-
-function drawFrame(ctx, bg, width, height, groundBottom, offset, lean, bob, kinds) {
-  const horizon = horizonFor(groundBottom)
-  ctx.drawImage(bg, 0, 0)
-
-  const rows = projectRoad({ width, height, horizon, offset })
-  for (const r of rows) {
-    ctx.fillStyle = r.stripe ? C.grass1 : C.grass2
-    ctx.fillRect(0, r.y, width, 1)
-    const edge = Math.round(r.halfWidth + r.rumbleWidth)
-    ctx.fillStyle = r.stripe ? C.rumble : C.white
-    ctx.fillRect(Math.round(r.center - edge), r.y, edge * 2, 1)
-    const half = Math.round(r.halfWidth)
-    ctx.fillStyle = r.stripe ? '#7a7a86' : '#6c6c78'
-    ctx.fillRect(Math.round(r.center - half), r.y, half * 2, 1)
-    if (r.stripe === 0) {
-      const lane = Math.max(1, Math.round(r.laneWidth))
-      ctx.fillStyle = C.white
-      ctx.fillRect(Math.round(r.center - lane / 2), r.y, lane, 1)
-    }
-  }
-
-  // Roadside objects, far to near. z = depth ahead of the camera.
-  const depthRows = height - horizon
-  const farZ = CAMERA_HEIGHT * depthRows
-  const phase = ((offset % SPRITE_SPACING) + SPRITE_SPACING) % SPRITE_SPACING
-  const base = Math.floor(offset / SPRITE_SPACING)
-  const count = Math.floor(farZ / SPRITE_SPACING)
-  for (let k = count; k >= 1; k--) {
-    const z = k * SPRITE_SPACING - phase
-    if (z < CAMERA_HEIGHT * 0.55) continue
-    const scale = CAMERA_HEIGHT / z
-    if (scale * SPRITE_SIZE < 0.15) continue
-    const g = base + k
-    const kind = kinds[Math.floor(g / 2) % kinds.length]
-    const y = horizon - 1 + (CAMERA_HEIGHT * depthRows) / z
-    const roadEdge = 0.9 * (width / 2) * scale * 1.12
-    const gap = 24 * SPRITE_SIZE * scale
-    const x = width / 2 + (g % 2 ? -1 : 1) * (roadEdge + gap)
-    drawSprite(ctx, kind, x, y, scale * SPRITE_SIZE)
-  }
-
-  drawBike(ctx, Math.round(width / 2), groundBottom - 4 - bob, lean)
 }
 
 export default function RoadCanvas({ activeStageId = null }) {
   const canvasRef = useRef(null)
   const stageRef = useRef(activeStageId)
   const redrawRef = useRef(() => {})
-  const reducedMotion = useReducedMotion()
+  const reducedMotion = usePrefersReducedMotion()
 
   useEffect(() => {
     stageRef.current = activeStageId
@@ -88,30 +40,20 @@ export default function RoadCanvas({ activeStageId = null }) {
     const canvas = canvasRef.current
     if (!canvas) return
     const ctx = canvas.getContext('2d')
-    const bg = document.createElement('canvas')
-    const bgCtx = bg.getContext('2d')
+    const bgCtx = document.createElement('canvas').getContext('2d')
 
     let width = 0
     let height = 0
     let groundBottom = 0
-    let bgStage
     let offset = 0
     let speed = 0
     let lean = 0
+    let hillShift = 0
+    let rivals = []
     let lastY = window.scrollY
     let lastT = null
+    let lastMphAt = 0
     let raf = 0
-
-    const buildBackground = () => {
-      const horizon = horizonFor(groundBottom)
-      bg.width = width
-      bg.height = height
-      drawSky(bgCtx, width, horizon)
-      // Himalayas behind the Nepal stages, and at the start/finish (home: Kathmandu).
-      const stage = stageRef.current
-      drawHills(bgCtx, width, horizon, stage === null || sceneryFor(stage).includes('prayer-flags'))
-      bgStage = stageRef.current
-    }
 
     const resize = () => {
       const layout = canvasLayout({
@@ -122,24 +64,35 @@ export default function RoadCanvas({ activeStageId = null }) {
       width = canvas.width = layout.width
       height = canvas.height = layout.height
       groundBottom = layout.groundBottom
-      buildBackground()
+      paintSky(bgCtx, width, height, groundBottom)
+      rivals = spawnRivals(farZFor(height, groundBottom))
     }
 
     const render = () => {
-      if (bgStage !== stageRef.current) buildBackground()
-      const bob = reducedMotion ? 0 : Math.floor(offset / 90) % 2
-      drawFrame(ctx, bg, width, height, groundBottom, offset, lean, bob, sceneryFor(stageRef.current))
+      drawScene(ctx, {
+        bg: bgCtx.canvas, width, height, groundBottom, offset,
+        curve: curveAt(offset), hillShift, lean,
+        bob: reducedMotion ? 0 : Math.floor(offset / 90) % 2,
+        stageId: stageRef.current, rivals,
+      })
     }
 
     const tick = (t) => {
       const dt = lastT === null ? 0 : (t - lastT) / 1000
       lastT = t
       const y = window.scrollY
-      const delta = y - lastY
+      const delta = normalizedDelta(y - lastY, dt)
       lastY = y
       speed = nextSpeed({ current: speed, scrollDelta: delta, dt, reducedMotion: false })
-      offset += speed * OFFSET_PER_SPEED * Math.min(dt, 0.1)
+      const step = speed * OFFSET_PER_SPEED * Math.min(dt, 0.1)
+      offset += step
+      hillShift += curveAt(offset) * step * HILL_PARALLAX
       lean += (clamp(delta / 30, -1, 1) - lean) * Math.min(1, dt * 8)
+      rivals = stepRivals({ rivals, playerSpeed: speed, dt, farZ: farZFor(height, groundBottom), nearZ: NEAR_Z })
+      if (t - lastMphAt >= MPH_INTERVAL) {
+        publishMph(toMph(speed))
+        lastMphAt = t
+      }
       render()
       raf = requestAnimationFrame(tick)
     }
@@ -162,6 +115,7 @@ export default function RoadCanvas({ activeStageId = null }) {
 
     resize()
     render()
+    if (reducedMotion) publishMph(0)
     redrawRef.current = reducedMotion ? render : () => {}
     window.addEventListener('resize', onResize)
     document.addEventListener('visibilitychange', onVisibility)

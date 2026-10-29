@@ -3,6 +3,10 @@
   padding: 20vh 16px;
 }
 
+/* Focus lands here from PRESS START; the panel inside shows it. */
+.stage:focus { outline: none; }
+.stage:focus-visible .panel { outline: 3px solid var(--ink); outline-offset: 4px; }
+
 .panel {
   position: relative;
   max-width: 680px;

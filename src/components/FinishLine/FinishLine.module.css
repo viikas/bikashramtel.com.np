@@ -42,6 +42,13 @@
   line-height: 1.6;
 }
 
+.save {
+  align-self: flex-start;
+  background: var(--ink);
+  color: var(--sun);
+  font-size: 0.65rem;
+}
+
 .links {
   list-style: none;
   display: flex;

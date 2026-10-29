@@ -1,14 +1,17 @@
 import { useEffect, useRef, useState } from 'react'
-import { useInView, useReducedMotion } from 'framer-motion'
+import { useInView } from 'framer-motion'
+import usePrefersReducedMotion from '../../hooks/usePrefersReducedMotion'
 import styles from './FinishLine.module.css'
 import { career } from '../../data/career'
 import { socialLinks, contactInfo } from '../../data/contact'
 import { countdownValue } from '../../game/countdown'
 
+const RESUME_URL = `${import.meta.env.BASE_URL}Bikash-Ramtel-Resume.pdf`
+
 export default function FinishLine() {
   const ref = useRef(null)
   const reached = useInView(ref, { once: true, amount: 0.3 })
-  const reducedMotion = useReducedMotion()
+  const reducedMotion = usePrefersReducedMotion()
   const [count, setCount] = useState(countdownValue(null, 0))
 
   // The countdown starts when the visitor reaches the finish, then loops.
@@ -29,6 +32,10 @@ export default function FinishLine() {
           Continue? <span className={styles.count} aria-hidden="true">{count}</span>
         </h2>
         <p className={styles.lead}>Building something in logistics, tracking, or AI automation? Let's talk.</p>
+
+        <a className={`pixel-btn ${styles.save}`} href={RESUME_URL} download>
+          <span aria-hidden="true">💾</span> Save game · Download resume (PDF)
+        </a>
 
         <ul className={styles.links}>
           {contactInfo.map(item => (

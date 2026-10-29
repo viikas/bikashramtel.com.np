@@ -1,9 +1,21 @@
+import { useSyncExternalStore } from 'react'
 import styles from './Hud.module.css'
 import { career } from '../../data/career'
 import { checkpointPercents, markerPercent, hudLabel } from '../../game/course'
+import { subscribeMph, currentMph } from '../../game/telemetry'
 
 const { stages } = career
 const CHECKPOINTS = checkpointPercents(stages.length)
+
+// Live reading from the road canvas; decorative, so hidden from screen readers.
+function Speedometer() {
+  const mph = useSyncExternalStore(subscribeMph, currentMph, () => 0)
+  return (
+    <span className={styles.mph} aria-hidden="true">
+      {String(mph).padStart(3, '0')}<span className={styles.mphUnit}>MPH</span>
+    </span>
+  )
+}
 
 export default function Hud({ phase, stageId, index }) {
   const stage = stages.find(s => s.id === stageId) ?? null
@@ -14,14 +26,17 @@ export default function Hud({ phase, stageId, index }) {
   return (
     <nav className={styles.hud} aria-label="Course">
       <div className={`${styles.box} ${styles.xp}`}>
-        <span className={styles.boxLabel}>XP · 12+ YRS</span>
+        <div className={styles.xpTop}>
+          <span className={styles.boxLabel}>XP · 12+ YRS</span>
+          <Speedometer />
+        </div>
         <div className={styles.gauge} aria-hidden="true">
           <div className={styles.gaugeFill} style={{ width: `${Math.max(marker, 4)}%` }} />
         </div>
       </div>
 
       <div className={`${styles.box} ${styles.course}`}>
-        <span className={styles.courseLabel} aria-live="polite">{label}</span>
+        <span className={styles.courseLabel} data-hud-label>{label}</span>
         <div className={styles.track}>
           <span className={styles.marker} style={{ left: `${marker}%` }} aria-hidden="true" />
           {stages.map((s, i) => {

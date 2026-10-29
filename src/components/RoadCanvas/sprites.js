@@ -5,6 +5,8 @@
  * bottom-centre, y going up (negative). drawSprite scales them by depth.
  */
 
+import { GLYPHS, GLYPH_HEIGHT, textWidth } from '../../game/pixelFont'
+
 const C = {
   sky1: '#7ec8f5', sky2: '#a6dcfa', sky3: '#cdeefe',
   grass1: '#8fd16a', grass2: '#7cc35a', grass3: '#3d8f3a', grassLight: '#4fa34a',
@@ -100,13 +102,15 @@ export function drawSky(ctx, width, horizon) {
 
 /**
  * Horizon silhouette. `mountains` adds snow-capped Himalayan peaks behind
- * the green hills (Nepal stages); otherwise just rolling hills.
+ * the green hills (Nepal stages); otherwise just rolling hills. `shift`
+ * slides the hills sideways as the road curves (mountains move at half speed).
  */
-export function drawHills(ctx, width, horizon, mountains) {
+export function drawHills(ctx, width, horizon, mountains, shift = 0) {
   if (mountains) {
     for (let x = 0; x < width; x++) {
-      const h = Math.round(20 + 11 * Math.sin(x * 0.045) + 7 * Math.sin(x * 0.13 + 1))
-      ctx.fillStyle = x % 40 < 20 ? C.mountain : C.mountainShade
+      const wx = x + shift * 0.5
+      const h = Math.round(20 + 11 * Math.sin(wx * 0.045) + 7 * Math.sin(wx * 0.13 + 1))
+      ctx.fillStyle = ((Math.floor(wx) % 40) + 40) % 40 < 20 ? C.mountain : C.mountainShade
       ctx.fillRect(x, horizon - h, 1, h)
       if (h > 28) {
         ctx.fillStyle = C.white
@@ -115,10 +119,53 @@ export function drawHills(ctx, width, horizon, mountains) {
     }
   }
   for (let x = 0; x < width; x++) {
-    const h = Math.round(7 + 4 * Math.sin(x * 0.06 + 2) + 2 * Math.sin(x * 0.19))
+    const wx = x + shift
+    const h = Math.round(7 + 4 * Math.sin(wx * 0.06 + 2) + 2 * Math.sin(wx * 0.19))
     ctx.fillStyle = C.grass3
     ctx.fillRect(x, horizon - h, 1, h)
   }
+}
+
+/**
+ * Roadside billboard with two lines of 3×5 pixel text. (x, y) is the base of
+ * the board's inner edge post; `side` is -1 (left of road) or 1 (right) and the
+ * board extends away from the road. Far boards show placeholder bars instead of text.
+ */
+export function drawBillboard(ctx, lines, x, y, scale, side) {
+  const boardW = Math.max(...lines.map(textWidth)) + 6
+  const boardH = 2 * GLYPH_HEIGHT + 2 + 6
+  const postH = 14
+  const left = side > 0 ? x : x - boardW * scale
+  const top = y - (postH + boardH) * scale
+  const fill = (rx, ry, rw, rh, color) => {
+    ctx.fillStyle = color
+    ctx.fillRect(Math.round(left + rx * scale), Math.round(top + ry * scale), Math.max(1, Math.round(rw * scale)), Math.max(1, Math.round(rh * scale)))
+  }
+  fill(4, boardH, 2, postH, C.bark)
+  fill(boardW - 6, boardH, 2, postH, C.bark)
+  fill(0, 0, boardW, boardH, C.ink)
+  fill(1, 1, boardW - 2, boardH - 2, C.white)
+  // Text only when each font pixel gets at least one whole screen pixel; snap
+  // to whole cells so glyphs stay crisp instead of drifting apart.
+  const cell = Math.floor(scale)
+  if (cell < 1) {
+    fill(3, 4, boardW - 6, 2, C.rumble)
+    fill(3, 10, boardW - 8, 2, C.ink)
+    return
+  }
+  const boardLeft = Math.round(left)
+  const boardWidthPx = Math.round(boardW * scale)
+  const textTop = Math.round(top + 3 * scale)
+  lines.forEach((line, row) => {
+    const lineLeft = boardLeft + Math.round((boardWidthPx - textWidth(line) * cell) / 2)
+    const lineTop = textTop + row * (GLYPH_HEIGHT + 2) * cell
+    ctx.fillStyle = row === 0 ? C.rumble : C.ink
+    ;[...line].forEach((ch, i) => {
+      for (const [gx, gy] of GLYPHS[ch] ?? []) {
+        ctx.fillRect(lineLeft + (i * 4 + gx) * cell, lineTop + gy * cell, cell, cell)
+      }
+    })
+  })
 }
 
 // [x, y, w, h, color] relative to the rear tyre's contact point, y up negative.
@@ -130,28 +177,38 @@ const BIKE_BASE = [
   [-4, -11, 8, 2, C.rumble],
   [-6, -14, 12, 3, '#2a2a3a'],
 ]
+// 'jacket' and 'helmet' are placeholders filled per rider.
 const BIKE_RIDER = [
   [-8, -19, 3, 6, C.denim],
   [5, -19, 3, 6, C.denim],
-  [-6, -28, 12, 10, C.rumble],
+  [-6, -28, 12, 10, 'jacket'],
   [-6, -23, 12, 2, C.white],
-  [-9, -26, 3, 6, C.rumble],
-  [6, -26, 3, 6, C.rumble],
+  [-9, -26, 3, 6, 'jacket'],
+  [6, -26, 3, 6, 'jacket'],
   [-11, -21, 3, 2, C.ink],
   [8, -21, 3, 2, C.ink],
-  [-4, -35, 8, 7, C.sun],
+  [-4, -35, 8, 7, 'helmet'],
   [-1, -35, 2, 7, C.rumble],
 ]
 
-/** Rider seen from behind. `lean` (-1…1) shifts the rider up to 2px sideways. */
-export function drawBike(ctx, x, y, lean) {
+export const RIDERS = {
+  player: { jacket: C.rumble, helmet: C.sun },
+  blue:   { jacket: C.blue, helmet: C.white },
+  green:  { jacket: C.grass3, helmet: C.orange },
+}
+
+/**
+ * Rider seen from behind. `lean` (-1…1) shifts the rider up to 2px sideways;
+ * `scale` shrinks rivals with distance; `colors` picks the jacket and helmet.
+ */
+export function drawBike(ctx, x, y, lean, scale = 1, colors = RIDERS.player) {
   const shift = Math.round(lean * 2)
-  for (const [rx, ry, rw, rh, color] of BIKE_BASE) {
-    ctx.fillStyle = color
-    ctx.fillRect(Math.round(x + rx), Math.round(y + ry), rw, rh)
+  const paint = (rects, dx) => {
+    for (const [rx, ry, rw, rh, color] of rects) {
+      ctx.fillStyle = colors[color] ?? color
+      ctx.fillRect(Math.round(x + (rx + dx) * scale), Math.round(y + ry * scale), Math.max(1, Math.round(rw * scale)), Math.max(1, Math.round(rh * scale)))
+    }
   }
-  for (const [rx, ry, rw, rh, color] of BIKE_RIDER) {
-    ctx.fillStyle = color
-    ctx.fillRect(Math.round(x + rx + shift), Math.round(y + ry), rw, rh)
-  }
+  paint(BIKE_BASE, 0)
+  paint(BIKE_RIDER, shift)
 }

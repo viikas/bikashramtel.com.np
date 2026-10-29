@@ -81,7 +81,11 @@ button {
   box-shadow: 0 0 0 5px var(--sun);
 }
 
-section { scroll-margin-top: 16px; }
+/* Anchor jumps and keyboard focus stay clear of the fixed HUD. */
+html {
+  scroll-padding-top: 16px;
+  scroll-padding-bottom: calc(var(--hud-h-desktop) + 12px);
+}
 
 /* Content rides above the road canvas and clears the fixed HUD. */
 main {
@@ -90,8 +94,12 @@ main {
   padding-bottom: var(--hud-h-desktop);
 }
 
-@media (max-width: 720px) {
-  section { scroll-margin-top: calc(var(--hud-h-mobile) + 12px); }
+/* Compact HUD (top bar) — keep in sync with COMPACT_HUD_QUERY in src/game/viewport.js. */
+@media (max-width: 720px), (max-height: 500px) {
+  html {
+    scroll-padding-top: calc(var(--hud-h-mobile) + 12px);
+    scroll-padding-bottom: 12px;
+  }
 
   main {
     padding-top: var(--hud-h-mobile);
