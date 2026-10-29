@@ -4,13 +4,13 @@ import { career } from './career.js'
 import { loadout } from './loadout.js'
 import { pitStop } from './pitstop.js'
 
-test('four stages, chronological, PortPro last', () => {
-  assert.deepEqual(career.stages.map(s => s.id), ['ascend', 'wisdom-mirror', 'kodknackare', 'portpro'])
-  assert.deepEqual(career.stages.map(s => s.number), [1, 2, 3, 4])
+test('four stages, newest first: PortPro leads, stage numbers count down', () => {
+  assert.deepEqual(career.stages.map(s => s.id), ['portpro', 'kodknackare', 'wisdom-mirror', 'ascend'])
+  assert.deepEqual(career.stages.map(s => s.number), [4, 3, 2, 1])
 })
 
 test('PortPro carries all seven resume bullets', () => {
-  const portpro = career.stages.at(-1)
+  const portpro = career.stages[0]
   assert.equal(portpro.bullets.length, 7)
   assert.equal(portpro.dates, 'Apr 2021 – Present')
   assert.deepEqual(portpro.loadout, ['NODE', 'MONGO', 'POSTGRES', 'RABBITMQ', 'TEMPORAL', 'LLM'])

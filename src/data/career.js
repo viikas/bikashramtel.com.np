@@ -1,6 +1,6 @@
 /**
  * Career content — every line comes from the resume (Oct 2026).
- * Stages run chronologically so the race ends at the present.
+ * Stages run newest first — the current job leads — and their numbers count down 4→1.
  */
 
 export const career = {
@@ -20,46 +20,9 @@ export const career = {
   },
   education: {
     degree: 'BE Computer Engineering',
-    school: 'Purbanchal University, College of Information Technology & Engineering, Kathmandu',
+    school: 'Purbanchal University',
   },
   stages: [
-    {
-      id: 'ascend',
-      number: 1,
-      company: 'Ascend Infotech',
-      place: 'Lalitpur',
-      role: 'Web Developer',
-      dates: '2013 – 2015 · remote part-time 2017 – 2019',
-      loadout: ['LARAVEL', 'ANGULARJS', 'REACT'],
-      bullets: [
-        'Designed and delivered a patient registry and dialysis tracking system for the National Kidney Center, and built remote projects for US-based stakeholders in Laravel, AngularJS, and React.',
-      ],
-    },
-    {
-      id: 'wisdom-mirror',
-      number: 2,
-      company: 'Wisdom Mirror',
-      place: 'Kathmandu',
-      role: 'Full Stack Developer',
-      dates: '2016 – 2019',
-      loadout: ['REACT', 'LARAVEL', 'ANGULARJS', 'MYSQL'],
-      bullets: [
-        'Built Karma CRM, a SaaS client and project management product, from scratch. Served as scrum master for the two-year build and delivered the React application solo for its final year.',
-        'Led the development team for SkyCRM, an inventory, pricing, and quotation system for an aluminium fabrication company (Laravel, AngularJS, MySQL).',
-      ],
-    },
-    {
-      id: 'kodknackare',
-      number: 3,
-      company: 'Kodknackare Webblösningar AB',
-      place: 'Malmö, Sweden (remote)',
-      role: 'Lead Full Stack Developer',
-      dates: '2019 – 2021',
-      loadout: ['REACT', 'PHP'],
-      bullets: [
-        'Led the development team building Kod CMS v3, a content management and e-commerce platform, owning the React front end and PHP back end and coordinating delivery with the CEO in Sweden.',
-      ],
-    },
     {
       id: 'portpro',
       number: 4,
@@ -76,6 +39,43 @@ export const career = {
         'Designed event-driven services that react to container status changes to trigger and update logistics workflows, cutting manual data gathering and coordination for carrier operations teams.',
         'Shipped LLM-based functionality for information extraction and interpretation, evaluating AI approaches for production reliability and integrating them into established workflows.',
         'Maintain web-scraping and integration layers against constantly changing third-party interfaces, diagnosing and fixing data availability and accuracy issues in production.',
+      ],
+    },
+    {
+      id: 'kodknackare',
+      number: 3,
+      company: 'Kodknackare Webblösningar AB',
+      place: 'Malmö, Sweden (remote)',
+      role: 'Lead Full Stack Developer',
+      dates: '2019 – 2021',
+      loadout: ['REACT', 'PHP'],
+      bullets: [
+        'Led the development team building Kod CMS v3, a content management and e-commerce platform, owning the React front end and PHP back end and coordinating delivery with the CEO in Sweden.',
+      ],
+    },
+    {
+      id: 'wisdom-mirror',
+      number: 2,
+      company: 'Wisdom Mirror',
+      place: 'Kathmandu',
+      role: 'Full Stack Developer',
+      dates: '2016 – 2019',
+      loadout: ['REACT', 'LARAVEL', 'ANGULARJS', 'MYSQL'],
+      bullets: [
+        'Built Karma CRM, a SaaS client and project management product, from scratch. Served as scrum master for the two-year build and delivered the React application solo for its final year.',
+        'Led the development team for SkyCRM, an inventory, pricing, and quotation system for an aluminium fabrication company (Laravel, AngularJS, MySQL).',
+      ],
+    },
+    {
+      id: 'ascend',
+      number: 1,
+      company: 'Ascend Infotech',
+      place: 'Lalitpur',
+      role: 'Web Developer',
+      dates: '2013 – 2015 · remote part-time 2017 – 2019',
+      loadout: ['LARAVEL', 'ANGULARJS', 'REACT'],
+      bullets: [
+        'Designed and delivered a patient registry and dialysis tracking system for the National Kidney Center, and built remote projects for US-based stakeholders in Laravel, AngularJS, and React.',
       ],
     },
   ],

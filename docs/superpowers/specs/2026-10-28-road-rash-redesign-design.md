@@ -66,7 +66,7 @@ Reference mockup: `.superpowers/brainstorm/87854-1793185756/content/direction-v2
 
 **Summary line:** Lead Software Engineer with 12+ years building production web platforms and 5+ years leading the Container Tracking module of PortPro's drayage TMS (550+ trucking companies, 100,000+ containers tracked in real time).
 
-**Stages, in chronological order, so the race ends at the present:**
+**Stages, newest first (Bikash's call after the first build: the current job leads; stage numbers count down 4→1):**
 
 | Stage | Role · Company | Dates | Content |
 |---|---|---|---|
@@ -120,7 +120,7 @@ Note: the resume lists **four** jobs, but the mockup course map showed five chec
 
 The full skills table appears in its own Loadout section.
 
-**Education:** BE Computer Engineering, Purbanchal University, College of Information Technology & Engineering, Kathmandu.
+**Education:** BE Computer Engineering, Purbanchal University.
 
 **Contact (from `src/data/contact.js`):**
 - email
@@ -137,7 +137,7 @@ The full skills table appears in its own Loadout section.
    - Subtitle: "LEAD SOFTWARE ENGINEER".
    - The summary line in readable type.
    - A blinking "PRESS START ▶" button that scrolls to Stage 1.
-   - Because the stages run chronologically, the start screen must already surface the PortPro headline (role, Container Tracking, 100k+, 550+) so nobody has to scroll to find it.
+   - The start screen also surfaces the PortPro headline (role, Container Tracking, 100k+, 550+).
 2. **Stages 1–4.** One section per job, styled as a 16-bit dialog or billboard panel (white or cream fill, thick dark pixel border, hard drop shadow) laid over the road. PortPro is the longest.
 3. **Loadout.** The full skills table, styled like a game's equipment screen.
 4. **Pit Stop (hobbies).** *(My call.)* One compact section with a few lines on gaming, anime, movies, DIY, and painting, plus the existing "quick facts" numbers from `src/data/about.js`. The five separate hobby gallery sections and their API-powered cover art (RAWG/TMDB) are removed from the page. Their components can stay in git history.

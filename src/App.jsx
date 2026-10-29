@@ -34,7 +34,7 @@ export default function App() {
         <ErrorBoundary name="Start"><StartLine onStart={startRace} /></ErrorBoundary>
         {career.stages.map((stage, i) => (
           <ErrorBoundary key={stage.id} name={stage.company}>
-            <Stage stage={stage} isCurrentLap={i === career.stages.length - 1} />
+            <Stage stage={stage} isCurrentLap={i === 0} />
           </ErrorBoundary>
         ))}
         <ErrorBoundary name="Loadout"><Loadout /></ErrorBoundary>
