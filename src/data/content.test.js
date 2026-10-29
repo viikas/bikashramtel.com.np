@@ -2,7 +2,7 @@ import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { career } from './career.js'
 import { loadout } from './loadout.js'
-import { pitStop } from './pitstop.js'
+import { pitStop, quickFacts } from './pitstop.js'
 
 test('four stages, newest first: PortPro leads, stage numbers count down', () => {
   assert.deepEqual(career.stages.map(s => s.id), ['portpro', 'kodknackare', 'wisdom-mirror', 'ascend'])
@@ -34,4 +34,9 @@ test('loadout has the nine resume categories in order', () => {
 
 test('pit stop covers five hobbies', () => {
   assert.deepEqual(pitStop.map(p => p.label), ['GAMING', 'ANIME', 'MOVIES & TV', 'DIY', 'PAINTING'])
+})
+
+test('pit stop quick facts live with the pit stop content', () => {
+  assert.deepEqual(quickFacts.map(f => f.label),
+    ['Hours Gamed', 'Anime Watched', 'DIY Projects', 'Paintings', 'Movies Watched', 'Lines of Code'])
 })

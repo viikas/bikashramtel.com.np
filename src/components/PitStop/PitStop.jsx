@@ -1,6 +1,5 @@
 import styles from './PitStop.module.css'
-import { pitStop } from '../../data/pitstop'
-import { about } from '../../data/about'
+import { pitStop, quickFacts } from '../../data/pitstop'
 
 export default function PitStop() {
   return (
@@ -19,7 +18,7 @@ export default function PitStop() {
         </ul>
 
         <ul className={styles.facts} aria-label="Quick facts">
-          {about.quickFacts.map(fact => (
+          {quickFacts.map(fact => (
             <li key={fact.label} className={styles.fact}>
               <span className={styles.factValue}>{fact.value}</span>
               <span className={styles.factLabel}>{fact.label}</span>

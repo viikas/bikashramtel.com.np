@@ -9,3 +9,12 @@ export const pitStop = [
   { label: 'DIY',         line: 'Bamboo bow & arrow, a home server rack, a drone build, a smart mirror.' },
   { label: 'PAINTING',    line: 'Canvas when the mood strikes: Mountain Sunrise, Kathmandu Nights, The Wanderer.' },
 ]
+
+export const quickFacts = [
+  { label: 'Hours Gamed',    value: '2,400+' },
+  { label: 'Anime Watched',  value: '120+' },
+  { label: 'DIY Projects',   value: '18' },
+  { label: 'Paintings',      value: '24' },
+  { label: 'Movies Watched', value: '500+' },
+  { label: 'Lines of Code',  value: '∞' },
+]
