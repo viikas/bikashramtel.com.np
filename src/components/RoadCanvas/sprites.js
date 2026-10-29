@@ -6,6 +6,7 @@
  */
 
 import { GLYPHS, GLYPH_HEIGHT, textWidth } from '../../game/pixelFont'
+import { boardWidthFor } from '../../game/billboardLayout'
 
 const C = {
   sky1: '#7ec8f5', sky2: '#a6dcfa', sky3: '#cdeefe',
@@ -106,9 +107,10 @@ export function drawSky(ctx, width, horizon) {
  * slides the hills sideways as the road curves (mountains move at half speed).
  */
 export function drawHills(ctx, width, horizon, mountains, shift = 0) {
+  shift = Math.round(shift) // whole pixels, so silhouettes slide instead of shimmering
   if (mountains) {
     for (let x = 0; x < width; x++) {
-      const wx = x + shift * 0.5
+      const wx = x + Math.round(shift * 0.5)
       const h = Math.round(20 + 11 * Math.sin(wx * 0.045) + 7 * Math.sin(wx * 0.13 + 1))
       ctx.fillStyle = ((Math.floor(wx) % 40) + 40) % 40 < 20 ? C.mountain : C.mountainShade
       ctx.fillRect(x, horizon - h, 1, h)
@@ -118,46 +120,44 @@ export function drawHills(ctx, width, horizon, mountains, shift = 0) {
       }
     }
   }
+  ctx.fillStyle = C.grass3
   for (let x = 0; x < width; x++) {
     const wx = x + shift
     const h = Math.round(7 + 4 * Math.sin(wx * 0.06 + 2) + 2 * Math.sin(wx * 0.19))
-    ctx.fillStyle = C.grass3
     ctx.fillRect(x, horizon - h, 1, h)
   }
 }
 
 /**
- * Roadside billboard with two lines of 3×5 pixel text. (x, y) is the base of
- * the board's inner edge post; `side` is -1 (left of road) or 1 (right) and the
- * board extends away from the road. Far boards show placeholder bars instead of text.
+ * Roadside billboard with two lines of 3×5 pixel text. `box` comes from
+ * billboardBox() (src/game/billboardLayout.js): its left edge, its unit size
+ * and whether text is drawn (whole-pixel cells) or placeholder bars.
+ * (y) is the ground line under the posts.
  */
-export function drawBillboard(ctx, lines, x, y, scale, side) {
-  const boardW = Math.max(...lines.map(textWidth)) + 6
+export function drawBillboard(ctx, lines, box, y) {
+  const boardW = boardWidthFor(lines)
   const boardH = 2 * GLYPH_HEIGHT + 2 + 6
   const postH = 14
-  const left = side > 0 ? x : x - boardW * scale
-  const top = y - (postH + boardH) * scale
+  const u = box.unit
+  const left = box.left
+  const top = y - (postH + boardH) * u
   const fill = (rx, ry, rw, rh, color) => {
     ctx.fillStyle = color
-    ctx.fillRect(Math.round(left + rx * scale), Math.round(top + ry * scale), Math.max(1, Math.round(rw * scale)), Math.max(1, Math.round(rh * scale)))
+    ctx.fillRect(Math.round(left + rx * u), Math.round(top + ry * u), Math.max(1, Math.round(rw * u)), Math.max(1, Math.round(rh * u)))
   }
   fill(4, boardH, 2, postH, C.bark)
   fill(boardW - 6, boardH, 2, postH, C.bark)
   fill(0, 0, boardW, boardH, C.ink)
   fill(1, 1, boardW - 2, boardH - 2, C.white)
-  // Text only when each font pixel gets at least one whole screen pixel; snap
-  // to whole cells so glyphs stay crisp instead of drifting apart.
-  const cell = Math.floor(scale)
-  if (cell < 1) {
+  if (!box.showText) {
     fill(3, 4, boardW - 6, 2, C.rumble)
     fill(3, 10, boardW - 8, 2, C.ink)
     return
   }
-  const boardLeft = Math.round(left)
-  const boardWidthPx = Math.round(boardW * scale)
-  const textTop = Math.round(top + 3 * scale)
+  const cell = box.cell
+  const textTop = Math.round(top) + 3 * cell
   lines.forEach((line, row) => {
-    const lineLeft = boardLeft + Math.round((boardWidthPx - textWidth(line) * cell) / 2)
+    const lineLeft = Math.round(left) + Math.floor((boardW - textWidth(line)) / 2) * cell
     const lineTop = textTop + row * (GLYPH_HEIGHT + 2) * cell
     ctx.fillStyle = row === 0 ? C.rumble : C.ink
     ;[...line].forEach((ch, i) => {

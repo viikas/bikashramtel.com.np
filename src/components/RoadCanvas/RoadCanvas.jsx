@@ -3,7 +3,7 @@ import styles from './RoadCanvas.module.css'
 import usePrefersReducedMotion from '../../hooks/usePrefersReducedMotion'
 import { curveAt } from '../../game/road'
 import { nextSpeed, normalizedDelta, toMph, OFFSET_PER_SPEED } from '../../game/speed'
-import { spawnRivals, stepRivals } from '../../game/rivals'
+import { rescaleRivals, stepRivals } from '../../game/rivals'
 import { canvasLayout, COMPACT_HUD_QUERY } from '../../game/viewport'
 import { publishMph } from '../../game/telemetry'
 import { drawScene, paintSky, farZFor, NEAR_Z } from './scene'
@@ -50,6 +50,7 @@ export default function RoadCanvas({ activeStageId = null }) {
     let lean = 0
     let hillShift = 0
     let rivals = []
+    let lastFarZ = 0
     let lastY = window.scrollY
     let lastT = null
     let lastMphAt = 0
@@ -65,7 +66,9 @@ export default function RoadCanvas({ activeStageId = null }) {
       height = canvas.height = layout.height
       groundBottom = layout.groundBottom
       paintSky(bgCtx, width, height, groundBottom)
-      rivals = spawnRivals(farZFor(height, groundBottom))
+      const farZ = farZFor(height, groundBottom)
+      rivals = rescaleRivals(rivals, lastFarZ, farZ) // mobile URL-bar resizes must not reset them
+      lastFarZ = farZ
     }
 
     const render = () => {

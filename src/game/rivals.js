@@ -25,3 +25,18 @@ export function stepRivals({ rivals, playerSpeed, dt, farZ, nearZ, rand = Math.r
     return { ...r, z: Math.min(z, farZ) }
   })
 }
+
+// Rider sprite height in local units (helmet top to tyre), at scale 1.
+export const RIDER_HEIGHT = 35
+
+/** Keep drawing a rival until its helmet, not its tyre, passes the ground line. */
+export function isRiderOnScreen(y, scale, groundBottom) {
+  return y - RIDER_HEIGHT * scale <= groundBottom
+}
+
+/** On resize, keep rivals where they were (scaled to the new depth range). */
+export function rescaleRivals(rivals, oldFarZ, newFarZ) {
+  if (!rivals.length || !oldFarZ) return spawnRivals(newFarZ)
+  if (oldFarZ === newFarZ) return rivals
+  return rivals.map(r => ({ ...r, z: r.z * (newFarZ / oldFarZ) }))
+}

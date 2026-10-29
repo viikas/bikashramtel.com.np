@@ -6,6 +6,8 @@
 import { projectRoad } from '../../game/road'
 import { sceneryFor } from '../../game/scenery'
 import { billboardsFor } from '../../data/billboards'
+import { billboardBox, boardWidthFor } from '../../game/billboardLayout'
+import { isRiderOnScreen } from '../../game/rivals'
 import { PALETTE as C, RIDERS, drawSky, drawHills, drawBike, drawSprite, drawBillboard } from './sprites'
 
 export const CAMERA_HEIGHT = 1000   // must match projectRoad's default
@@ -79,7 +81,9 @@ export function drawScene(ctx, {
     const gap = 24 * size
     const kind = kinds[Math.floor(g / 2) % kinds.length]
     if (kind === 'billboard') {
-      drawBillboard(ctx, messages[g % messages.length], center + side * (roadEdge + gap * 0.5), y, size, side)
+      const lines = messages[g % messages.length]
+      const box = billboardBox({ anchorX: center + side * (roadEdge + gap * 0.5), side, scale: size, boardW: boardWidthFor(lines), canvasWidth: width })
+      drawBillboard(ctx, lines, box, y)
     } else {
       drawSprite(ctx, kind, center + side * (roadEdge + gap), y, size)
     }
@@ -89,7 +93,7 @@ export function drawScene(ctx, {
   for (const r of [...rivals].sort((a, b) => b.z - a.z)) {
     if (r.z < NEAR_Z || r.z > farZ) continue
     const { y, scale, center } = project(r.z)
-    if (y > groundBottom + 2) continue
+    if (!isRiderOnScreen(y, scale, groundBottom)) continue
     const halfWidth = 0.9 * (width / 2) * scale
     drawBike(ctx, center + r.lane * halfWidth, y, 0, scale, RIDERS[r.jacket])
   }
